@@ -10,6 +10,7 @@ export function useActivityLog() {
     screen: 'index',
     selectedSession: 0,
     selectedType: 5,
+    selectedBranch: -1,
     scrubWeek: 12, // 0..12 = W14..W26
     logView: 'day', // 'day' | 'week' | 'month'
     dayOffset: 0, // 0 = today (6/19), -1 = 6/18, etc.
@@ -28,6 +29,9 @@ export function useActivityLog() {
   const shiftMonth = (d) => () => setState((s) => ({ ...s, monthOffset: s.monthOffset + d }));
   const jumpToDay = (off) => () => patch({ logView: 'day', dayOffset: off });
   const deselect = () => () => patch({ selectedSession: -1 });
+  const selectBranch = (i) => () =>
+    patch({ selectedBranch: state.selectedBranch === i ? -1 : i });
+  const deselectBranch = () => () => patch({ selectedBranch: -1 });
   const go = (screen) => () => patch({ screen });
 
   const onScrubDown = (e) => {
@@ -57,6 +61,8 @@ export function useActivityLog() {
     shiftMonth,
     jumpToDay,
     deselect,
+    selectBranch,
+    deselectBranch,
     go,
     onScrubDown,
     setState: patch,
@@ -66,7 +72,7 @@ export function useActivityLog() {
 }
 
 function renderVals(s, actions) {
-  const { selectSession, selectType, shiftDay, shiftWeek, shiftMonth, jumpToDay, deselect, go, onScrubDown, setState } = actions;
+  const { selectSession, selectType, shiftDay, shiftWeek, shiftMonth, jumpToDay, selectBranch, deselectBranch, go, onScrubDown, setState } = actions;
 
   const screens = ['index', 'today', 'log', 'compass', 'quarter'];
   const navJp = { index: '序', today: '本日', log: '日誌', compass: '分布', quarter: '四半期推移' };
@@ -449,7 +455,7 @@ function renderVals(s, actions) {
     return hh * 60 + mm;
   };
   const branchRows = sessions.map((sess, idx) => {
-    const isSelected = idx === s.selectedSession;
+    const isSelected = idx === s.selectedBranch;
     const dur = sess.end - sess.start;
     const dayBars = sess.main.map((b) => ({
       kind: b.kind,
@@ -591,8 +597,8 @@ function renderVals(s, actions) {
       prMarkerLeft,
       isSelected,
       rowBg: isSelected ? 'var(--bg-panel)' : 'transparent',
-      select: selectSession(idx),
-      deselect: deselect(),
+      select: selectBranch(idx),
+      deselect: deselectBranch(),
     };
   });
   const totalSessionsLabel = String(sessions.length).padStart(2, '0');
