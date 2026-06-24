@@ -1,5 +1,5 @@
-import { ToggleButton, IconOnlyButton, Button, FullScreenModal } from '@freee_jp/vibes';
-import { MdChevronLeft, MdChevronRight, MdToday } from 'react-icons/md';
+import { ToggleButton, IconOnlyButton, Button, FullScreenModal, DatePicker } from '@freee_jp/vibes';
+import { MdChevronLeft, MdChevronRight, MdToday, MdCalendarToday } from 'react-icons/md';
 
 export default function LogScreen({ vm }) {
   return (
@@ -29,7 +29,7 @@ export default function LogScreen({ vm }) {
         </div>
 
         {vm.isLogDay && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
             <IconOnlyButton IconComponent={MdChevronLeft} label="前日へ" appearance="secondary" small onClick={vm.shiftDayPrev} />
             <div style={{ textAlign: 'center', minWidth: 200 }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.dayLabel}</div>
@@ -37,6 +37,12 @@ export default function LogScreen({ vm }) {
             </div>
             <IconOnlyButton IconComponent={MdChevronRight} label="翌日へ" appearance="secondary" small disabled={vm.dayNextDisabled} onClick={vm.shiftDayNext} />
             <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" onClick={vm.shiftDayToToday}>本日へ</Button>
+            <IconOnlyButton IconComponent={MdCalendarToday} label="日付を選択" appearance="secondary" small onClick={vm.toggleDatePicker} />
+            {vm.datePickerOpen && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, zIndex: 10, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', borderRadius: 'var(--radius-card)' }}>
+                <DatePicker date={vm.viewedDateISO} maxDate={vm.maxDateISO} onDateClick={vm.onDatePickerSelect} />
+              </div>
+            )}
           </div>
         )}
         {vm.isLogWeek && (
