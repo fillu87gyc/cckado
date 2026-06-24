@@ -1142,7 +1142,7 @@ function renderVals(s, actions) {
     totalTools,
     totalInterrupts,
     logView: s.logView,
-    logViewItems: [{ value: 'day', label: '日' }, { value: 'week', label: '週' }, { value: 'month', label: '月' }],
+    logViewItems: [{ value: 'day', label: 'Daily' }, { value: 'week', label: 'Weekly' }, { value: 'month', label: 'Monthly' }],
     onLogViewChange: (v) => setState({ logView: v }),
     isLogDay: s.logView === 'day',
     isLogWeek: s.logView === 'week',
