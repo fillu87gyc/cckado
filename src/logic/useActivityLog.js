@@ -80,9 +80,6 @@ function renderVals(s, actions) {
       en: navEn[sc],
       icon: navIcon[sc],
       go: go(sc),
-      tabBg: active ? 'var(--accent)' : 'transparent',
-      tabColor: active ? 'var(--color-text-on-primary)' : 'var(--ink-2)',
-      tabWeight: active ? 700 : 400,
       iconOpacity: active ? 1 : 0.7,
     };
   });
@@ -1121,6 +1118,7 @@ function renderVals(s, actions) {
     isCompass: s.screen === 'compass',
     isQuarter: s.screen === 'quarter',
     navItems,
+    currentNavIndex: screens.indexOf(s.screen),
     tocItems,
     todayStats,
     aiPct, mnPct,
