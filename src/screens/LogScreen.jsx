@@ -1,4 +1,4 @@
-import { TabBar, IconOnlyButton, Button } from '@freee_jp/vibes';
+import { ButtonGroup, OptionButton, RadioButton, IconOnlyButton, Button } from '@freee_jp/vibes';
 import { MdChevronLeft, MdChevronRight, MdToday } from 'react-icons/md';
 
 export default function LogScreen({ vm }) {
@@ -12,12 +12,20 @@ export default function LogScreen({ vm }) {
 
       {/* Day / Week / Month sub-nav + date navigator */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, marginBottom: 28, padding: '14px 18px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-card)' }}>
-        <TabBar
-          small
-          currentTabIndex={vm.logViewItems.findIndex((it) => it.value === vm.logView)}
-          onClickTab={(i) => vm.onLogViewChange(vm.logViewItems[i].value)}
-          tabs={vm.logViewItems.map((it) => it.label)}
-        />
+        <ButtonGroup>
+          {vm.logViewItems.map((it) => (
+            <OptionButton key={it.value} checked={vm.logView === it.value} size="small">
+              <RadioButton
+                name="logView"
+                value={it.value}
+                checked={vm.logView === it.value}
+                onChange={() => vm.onLogViewChange(it.value)}
+              >
+                {it.label}
+              </RadioButton>
+            </OptionButton>
+          ))}
+        </ButtonGroup>
 
         {vm.isLogDay && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
