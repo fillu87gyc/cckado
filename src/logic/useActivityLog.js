@@ -16,6 +16,7 @@ export function useActivityLog() {
     dayOffset: 0, // 0 = today (6/19), -1 = 6/18, etc.
     weekOffset: 0, // 0 = current week (W26), -1 = W25, etc.
     monthOffset: 0, // 0 = current month (6月)
+    datePickerOpen: false,
   });
 
   const patch = (p) => setState((s) => ({ ...s, ...p }));
@@ -28,6 +29,7 @@ export function useActivityLog() {
   const shiftWeek = (d) => () => setState((s) => ({ ...s, weekOffset: s.weekOffset + d }));
   const shiftMonth = (d) => () => setState((s) => ({ ...s, monthOffset: s.monthOffset + d }));
   const jumpToDay = (off) => () => patch({ logView: 'day', dayOffset: off });
+  const toggleDatePicker = () => () => patch({ datePickerOpen: !state.datePickerOpen });
   const deselect = () => () => patch({ selectedSession: -1 });
   const selectBranch = (i) => () =>
     patch({ selectedBranch: state.selectedBranch === i ? -1 : i });
@@ -60,6 +62,7 @@ export function useActivityLog() {
     shiftWeek,
     shiftMonth,
     jumpToDay,
+    toggleDatePicker,
     deselect,
     selectBranch,
     deselectBranch,
@@ -72,7 +75,7 @@ export function useActivityLog() {
 }
 
 function renderVals(s, actions) {
-  const { selectSession, selectType, shiftDay, shiftWeek, shiftMonth, jumpToDay, selectBranch, deselectBranch, go, onScrubDown, setState } = actions;
+  const { selectSession, selectType, shiftDay, shiftWeek, shiftMonth, jumpToDay, toggleDatePicker, selectBranch, deselectBranch, go, onScrubDown, setState } = actions;
 
   const screens = ['index', 'today', 'log', 'compass', 'quarter'];
   const navJp = { index: '序', today: '本日', log: '日誌', compass: '分布', quarter: '四半期推移' };
@@ -614,7 +617,14 @@ function renderVals(s, actions) {
   const pad2 = (n) => String(n).padStart(2, '0');
   const fmtDate = (d) => d.getMonth() + 1 + '/' + d.getDate();
   const fmtDateFull = (d) => d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate());
+  const fmtISO = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const isWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
+  const jumpToDate = (isoStr) => {
+    const [y, m, d] = isoStr.split('-').map(Number);
+    const picked = new Date(y, m - 1, d);
+    const off = Math.round((picked.getTime() - baseDate.getTime()) / (24 * 3600 * 1000));
+    setState({ dayOffset: Math.min(off, 0), datePickerOpen: false });
+  };
 
   const hashStr = (str) => {
     let h = 2166136261;
@@ -1179,6 +1189,11 @@ function renderVals(s, actions) {
     shiftDayToToday: shiftDay(-s.dayOffset),
     canShiftDayNext: s.dayOffset < 0,
     dayNextDisabled: !(s.dayOffset < 0),
+    datePickerOpen: s.datePickerOpen,
+    toggleDatePicker: toggleDatePicker(),
+    viewedDateISO: fmtISO(viewedDate),
+    maxDateISO: fmtISO(baseDate),
+    onDatePickerSelect: jumpToDate,
     weekDays, weekTotals, weekAvgAi, weekLabel, weekRangeLabel,
     weekBranchesRich, weekBranchCount, weekDayCols, weekConcSamples,
     weekConcPeak: weekConc.peak,
