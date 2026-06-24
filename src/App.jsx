@@ -1,9 +1,19 @@
+import { TabBar } from '@freee_jp/vibes';
+import { MdAnalytics, MdMenuBook, MdToday, MdListAlt, MdDonutSmall, MdInsights } from 'react-icons/md';
 import { useActivityLog } from './logic/useActivityLog.js';
 import IndexScreen from './screens/IndexScreen.jsx';
 import TodayScreen from './screens/TodayScreen.jsx';
 import LogScreen from './screens/LogScreen.jsx';
 import CompassScreen from './screens/CompassScreen.jsx';
 import QuarterScreen from './screens/QuarterScreen.jsx';
+
+const navIconComponents = {
+  menu_book: MdMenuBook,
+  today: MdToday,
+  list_alt: MdListAlt,
+  donut_small: MdDonutSmall,
+  insights: MdInsights,
+};
 
 function App() {
   const vm = useActivityLog();
@@ -13,7 +23,7 @@ function App() {
       {/* MASTHEAD */}
       <header style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--rule)', padding: '18px 32px', display: 'flex', alignItems: 'center', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span className="material-icons-outlined" style={{ fontSize: 24, color: 'var(--accent)' }}>analytics</span>
+          <MdAnalytics size={24} color="var(--accent)" />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 18, fontWeight: 700, letterSpacing: '.02em', color: 'var(--ink)' }}>稼働ログ</div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)', letterSpacing: '.04em' }}>Activity Log</div>
@@ -32,15 +42,22 @@ function App() {
       </header>
 
       {/* NAV / TOC */}
-      <nav style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--rule)', padding: '0 32px', display: 'flex', gap: 4, overflowX: 'auto' }}>
-        {vm.navItems.map((n, i) => (
-          <button key={i} onClick={n.go} style={{ background: n.tabBg, color: n.tabColor, border: 'none', padding: '0 18px', height: 42, marginTop: 6, marginBottom: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-family-body)', fontSize: 13, fontWeight: n.tabWeight, borderRadius: 'var(--radius-input) var(--radius-input) 0 0', letterSpacing: '.02em', transition: 'background-color .2s, color .2s' }}>
-            <span className="material-icons-outlined" style={{ fontSize: 16, opacity: n.iconOpacity }}>{n.icon}</span>
-            <span>{n.jp}</span>
-            <span style={{ fontSize: 11, opacity: .65, letterSpacing: '.04em' }}>{n.en}</span>
-          </button>
-        ))}
-      </nav>
+      <TabBar
+        currentTabIndex={vm.currentNavIndex}
+        onClickTab={(i) => vm.navItems[i].go()}
+        tabs={vm.navItems.map((n) => {
+          const Icon = navIconComponents[n.icon];
+          return {
+            name: (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <Icon size={16} style={{ opacity: n.iconOpacity }} />
+                <span>{n.jp}</span>
+                <span style={{ fontSize: 11, opacity: .65, letterSpacing: '.04em' }}>{n.en}</span>
+              </span>
+            ),
+          };
+        })}
+      />
 
       {vm.isIndex && <IndexScreen vm={vm} />}
       {vm.isToday && <TodayScreen vm={vm} />}

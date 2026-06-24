@@ -1,6 +1,5 @@
-import Tabs from '../components/ds/Tabs.jsx';
-import IconButton from '../components/ds/IconButton.jsx';
-import Button from '../components/ds/Button.jsx';
+import { ToggleButton, IconOnlyButton, Button } from '@freee_jp/vibes';
+import { MdChevronLeft, MdChevronRight, MdToday } from 'react-icons/md';
 
 export default function LogScreen({ vm }) {
   return (
@@ -13,37 +12,51 @@ export default function LogScreen({ vm }) {
 
       {/* Day / Week / Month sub-nav + date navigator */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, marginBottom: 28, padding: '14px 18px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-card)' }}>
-        <Tabs items={vm.logViewItems} value={vm.logView} onChange={vm.onLogViewChange} size="sm" />
+        <div style={{ display: 'flex' }}>
+          {vm.logViewItems.map((it) => (
+            <ToggleButton
+              key={it.value}
+              type="radio"
+              name="logView"
+              value={it.value}
+              small
+              toggled={vm.logView === it.value}
+              onChange={() => vm.onLogViewChange(it.value)}
+            >
+              {it.label}
+            </ToggleButton>
+          ))}
+        </div>
 
         {vm.isLogDay && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <IconButton icon="chevron_left" appearance="secondary" size="sm" onClick={vm.shiftDayPrev} />
+            <IconOnlyButton IconComponent={MdChevronLeft} label="前日へ" appearance="secondary" small onClick={vm.shiftDayPrev} />
             <div style={{ textAlign: 'center', minWidth: 200 }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.dayLabel}</div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>{vm.dayLabelShort}</div>
             </div>
-            <IconButton icon="chevron_right" appearance="secondary" size="sm" disabled={vm.dayNextDisabled} onClick={vm.shiftDayNext} />
-            <Button appearance="secondary" size="sm" leftIcon="today" onClick={vm.shiftDayToToday}>本日へ</Button>
+            <IconOnlyButton IconComponent={MdChevronRight} label="翌日へ" appearance="secondary" small disabled={vm.dayNextDisabled} onClick={vm.shiftDayNext} />
+            <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" onClick={vm.shiftDayToToday}>本日へ</Button>
           </div>
         )}
         {vm.isLogWeek && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <IconButton icon="chevron_left" appearance="secondary" size="sm" onClick={vm.shiftWeekPrev} />
+            <IconOnlyButton IconComponent={MdChevronLeft} label="前週へ" appearance="secondary" small onClick={vm.shiftWeekPrev} />
             <div style={{ textAlign: 'center', minWidth: 200 }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.weekRangeLabel}</div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>第{vm.weekLabel} 週</div>
             </div>
-            <IconButton icon="chevron_right" appearance="secondary" size="sm" disabled={vm.weekNextDisabled} onClick={vm.shiftWeekNext} />
+            <IconOnlyButton IconComponent={MdChevronRight} label="翌週へ" appearance="secondary" small disabled={vm.weekNextDisabled} onClick={vm.shiftWeekNext} />
           </div>
         )}
         {vm.isLogMonth && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <IconButton icon="chevron_left" appearance="secondary" size="sm" onClick={vm.shiftMonthPrev} />
+            <IconOnlyButton IconComponent={MdChevronLeft} label="前月へ" appearance="secondary" small onClick={vm.shiftMonthPrev} />
             <div style={{ textAlign: 'center', minWidth: 200 }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.monthLabelEn}</div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>{vm.monthLabel}</div>
             </div>
-            <IconButton icon="chevron_right" appearance="secondary" size="sm" disabled={vm.monthNextDisabled} onClick={vm.shiftMonthNext} />
+            <IconOnlyButton IconComponent={MdChevronRight} label="翌月へ" appearance="secondary" small disabled={vm.monthNextDisabled} onClick={vm.shiftMonthNext} />
           </div>
         )}
       </div>

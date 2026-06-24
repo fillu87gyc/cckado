@@ -80,9 +80,6 @@ function renderVals(s, actions) {
       en: navEn[sc],
       icon: navIcon[sc],
       go: go(sc),
-      tabBg: active ? 'var(--accent)' : 'transparent',
-      tabColor: active ? 'var(--color-text-on-primary)' : 'var(--ink-2)',
-      tabWeight: active ? 700 : 400,
       iconOpacity: active ? 1 : 0.7,
     };
   });
@@ -1121,6 +1118,7 @@ function renderVals(s, actions) {
     isCompass: s.screen === 'compass',
     isQuarter: s.screen === 'quarter',
     navItems,
+    currentNavIndex: screens.indexOf(s.screen),
     tocItems,
     todayStats,
     aiPct, mnPct,
@@ -1144,7 +1142,7 @@ function renderVals(s, actions) {
     totalTools,
     totalInterrupts,
     logView: s.logView,
-    logViewItems: [{ value: 'day', label: '日' }, { value: 'week', label: '週' }, { value: 'month', label: '月' }],
+    logViewItems: [{ value: 'day', label: 'Daily' }, { value: 'week', label: 'Weekly' }, { value: 'month', label: 'Monthly' }],
     onLogViewChange: (v) => setState({ logView: v }),
     isLogDay: s.logView === 'day',
     isLogWeek: s.logView === 'week',
