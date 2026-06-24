@@ -3,6 +3,10 @@
    background-color, color, box-shadow, and border-color. No bounce, no
    stagger — calm and predictable. */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   motion 値も vibes コンポーネントに内蔵されるのみで公開されない。
+   自前の <a> ホバー遷移 (base.css) などに使うため変数として保持している。 */
+
 :root {
   --motion-duration-fast: 100ms;   /* @kind other */
   --motion-duration: 200ms;        /* @kind other */

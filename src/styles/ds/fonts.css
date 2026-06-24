@@ -4,6 +4,13 @@
    native system + CJK fonts (no @font-face), so glyphs render at the
    correct hinting and language fallback chain for each platform. */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   vibes は body のフォントや @font-face を一切出荷しない (利用側が用意する前提)。
+   ここでの freee-logo / Hiragino / Meiryo / Noto の宣言はアプリが自前で持つ必要がある。
+   Material Icons の @font-face は、IndexScreen の生 <span class="material-icons">
+   を react-icons (vibes MaterialIcon と同じアイコン系) へ移行したことで実質未使用になった。
+   他に raw Material アイコンを足さない限り削除可能だが、base.css のクラスと併せて当面残す。 */
+
 @font-face {
   font-family: 'freee-logo';
   font-style: normal;

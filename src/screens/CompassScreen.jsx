@@ -1,12 +1,21 @@
+import { SectionTitle } from '@freee_jp/vibes';
+
 export default function CompassScreen({ vm }) {
   return (
+    // vibes-audit: 画面の枠 (padding/maxWidth 1280px) は vibes Container の離散幅に合わず素 article。
     <article data-screen-label="作業分布 / Compass" style={{ padding: '48px 48px 96px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 28, borderBottom: '1px solid var(--color-border)', paddingBottom: 14 }}>
-        <h2 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 22, letterSpacing: '.06em', margin: 0 }}>作業分布</h2>
+        {/* 見出しを vibes SectionTitle (<h2>) へ移行。22px/字間は vibes 既定(16px)に従い design 変化を許容。
+           併記 "Style Map" と件数キャプションは Text の固定サイズ/字間制約で残置。 */}
+        <SectionTitle>作業分布</SectionTitle>
         <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, color: 'var(--ink-3)', letterSpacing: '.04em' }}>Style Map</span>
         <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.08em' }}>本週 (W26) のセッション 102 件 を集計</span>
       </div>
 
+      {/* vibes-audit: 3×3 のスタイルマップ(縦軸=AI主導度 / 横軸=並列度)。これは可視化マトリクスで、
+         セル背景の濃淡・outline・縦書き軸ラベル(writing-mode)・件数の重ね表示を伴う。
+         vibes にヒートマップ/マトリクス系の部品は無く、セルを vibes Button 化すると
+         背景濃淡や内部レイアウトを失うため、ここは全面的に素の grid+button で描画する。 */}
       <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gridTemplateRows: '1fr 60px', gap: 0, marginBottom: 48 }}>
         <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr 1fr', alignItems: 'center', paddingRight: 14, borderRight: '1px solid var(--color-border)' }}>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, writingMode: 'vertical-rl', textAlign: 'center', letterSpacing: '.06em', color: 'var(--ink-2)' }}>AI 主導 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)' }}>/ high</span></div>

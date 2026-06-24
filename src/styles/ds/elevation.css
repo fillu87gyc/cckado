@@ -3,6 +3,13 @@
    freee uses three stacked shadow tiers (card → floating → popup) and an inset
    double-ring focus halo with a 1px white bumper inside and outside the ring. */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   shadow / focus-ring も vibes は各コンポーネント CSS に焼き込むだけで変数公開しない。
+   CardBase は影と角丸こそ一致するが内側に固定 24px の padding を挿入するため、
+   端まで罫線で仕切る統計ストリップ等には使えない (詳細は各 screen の vibes-audit 参照)。
+   また TOC / Compass セル / カレンダー日付などの素の <button> は vibes Button ではないので、
+   `--shadow-focus-ring` を index.css のグローバル focus 規則から共有する必要がある。 */
+
 :root {
   --shadow-card:
     0 0 1rem rgba(0, 0, 0, 0.10),

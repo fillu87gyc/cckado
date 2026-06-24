@@ -3,6 +3,14 @@
    Spacing scale is fixed: components only accept margins from this set —
    0.25 / 0.5 / 1 / 1.5 / 2 / 3 rem (4 / 8 / 16 / 24 / 32 / 48 px). */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   vibes はスペーシング/角丸/z-index をコンポーネント内部に焼き込むのみで、
+   `--space-*` `--radius-*` `--z-*` といった値をアプリへ公開しない
+   (vibes_2021.css 内に `var(--space` の参照は 0 件)。
+   Stack/HStack/VStack の gap も {0,4,8,16,24,32,48}px に固定されており、
+   本アプリのチャート余白(6/10/12/14/18/20px 等)や角丸はこの離散セットに収まらない。
+   よってレイアウト用の生 CSS にはこのトークンが必要で、vibes では代替できない。 */
+
 :root {
   /* ── Spacing scale ──────────────────────────────────────── */
   --space-min: 1px;
