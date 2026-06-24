@@ -1,0 +1,19 @@
+/* freee Vibes — Motion tokens
+   The whole system runs on a single short duration (200 ms) applied to
+   background-color, color, box-shadow, and border-color. No bounce, no
+   stagger — calm and predictable. */
+
+:root {
+  --motion-duration-fast: 100ms;   /* @kind other */
+  --motion-duration: 200ms;        /* @kind other */
+  --motion-duration-slow: 320ms;   /* @kind other */
+
+  --motion-easing: ease;                              /* @kind other */
+  --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);  /* @kind other */
+
+  --motion-transition-default:
+    background-color var(--motion-duration) var(--motion-easing),
+    color            var(--motion-duration) var(--motion-easing),
+    box-shadow       var(--motion-duration) var(--motion-easing),
+    border-color     var(--motion-duration) var(--motion-easing);  /* @kind other */
+}

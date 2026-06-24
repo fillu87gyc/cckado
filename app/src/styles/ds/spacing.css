@@ -1,0 +1,62 @@
+/* freee Vibes — Spacing, radius, control-size tokens
+   Source: stylesheets/lv0/_size.scss
+   Spacing scale is fixed: components only accept margins from this set —
+   0.25 / 0.5 / 1 / 1.5 / 2 / 3 rem (4 / 8 / 16 / 24 / 32 / 48 px). */
+
+:root {
+  /* ── Spacing scale ──────────────────────────────────────── */
+  --space-min: 1px;
+  --space-xs: 0.25rem;   /*  4px */
+  --space-s:  0.5rem;    /*  8px */
+  --space-m:  1rem;      /* 16px — the basic unit */
+  --space-l:  1.5rem;    /* 24px — base padding inside ColumnBase */
+  --space-xl: 2rem;      /* 32px */
+  --space-xxl: 3rem;     /* 48px */
+
+  /* ── Form-control heights ───────────────────────────────── */
+  --control-h-sm: 1.5rem;  /* 24px */
+  --control-h-md: 2.25rem; /* 36px — default */
+  --control-h-lg: 3rem;    /* 48px */
+
+  /* ── Border-radius scale ────────────────────────────────── */
+  --radius-0250: 0.25rem;  /*  4px */
+  --radius-0500: 0.5rem;   /*  8px */
+  --radius-0750: 0.75rem;  /* 12px */
+  --radius-1000: 1rem;     /* 16px */
+  --radius-1500: 1.5rem;   /* 24px */
+  --radius-full: 99rem;    /* pill / circle */
+
+  /* Semantic radius aliases — pick by component family
+     (base → text containers, card → cards, floating/popup → menus,
+      dialog → modals, font → buttons & inputs)                        */
+  --radius-base:     var(--radius-0500);
+  --radius-card:     var(--radius-0750);
+  --radius-floating: var(--radius-1000);
+  --radius-popup:    var(--radius-1000);
+  --radius-dialog:   var(--radius-1500);
+  --radius-input:    var(--radius-0500);  /* buttons + inputs */
+  --radius-input-sm: var(--radius-0250);  /* dense inputs / chips */
+  --radius-focus:    var(--radius-0250);
+
+  /* ── Border widths ──────────────────────────────────────── */
+  --border-w: 1px;
+  --border-w-focus: 2px;
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  --container-narrow: 40rem;   /*  640px — wizard / login */
+  --container-normal: 70rem;   /* 1120px — default content width */
+  --container-wide-max: 100rem;/* 1600px — wide / collections */
+  --layout-min-width: 72rem;   /* 1152px — minimum supported viewport */
+  --breakpoint-mobile: 48rem;  /*  768px */
+
+  /* ── Z-index stack ──────────────────────────────────────── */
+  --z-overlay: 100;          /* @kind other */
+  --z-form-actions: 200;     /* @kind other */
+  --z-floating: 500;         /* @kind other */
+  --z-fullscreen: 700;       /* @kind other */
+  --z-modal: 1000;           /* @kind other */
+  --z-message-modal: 1500;   /* @kind other */
+  --z-popup: 2000;           /* @kind other */
+  --z-popup-message: 3000;   /* @kind other */
+  --z-fixed-message: 4000;   /* @kind other */
+}

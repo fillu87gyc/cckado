@@ -1,0 +1,121 @@
+/* freee Vibes — Color tokens
+   Source: github.com/freee/vibes — stylesheets/lv0/_colors.scss
+   Palette is organised as named hue scales (P, S, RE, OR, YE, YG, GR, BG, PU, GY)
+   with 5–10 steps, plus semantic aliases used by every component. */
+
+:root {
+  /* ── Primary (freee brand blue) ─────────────────────────── */
+  --vb-p-01: #ebf3ff;
+  --vb-p-02: #dce8ff;
+  --vb-p-03: #aac8ff;
+  --vb-p-04: #73a5ff;
+  --vb-p-05: #2864f0; /* brand mark color */
+  --vb-p-06: #3264dc;
+  --vb-p-07: #285ac8; /* interactive primary (links / primary button) */
+  --vb-p-08: #1e46aa;
+  --vb-p-09: #23418c;
+  --vb-p-10: #143278;
+
+  /* ── Sand / neutral ─────────────────────────────────────── */
+  --vb-s-01: #f7f5f5; /* column / surface */
+  --vb-s-02: #f0eded;
+  --vb-s-03: #e9e7e7;
+  --vb-s-04: #e1dcdc;
+  --vb-s-05: #d7d2d2;
+  --vb-s-06: #bebaba;
+  --vb-s-07: #aaa7a7;
+  --vb-s-08: #8c8989;
+  --vb-s-09: #6e6b6b; /* burnt — subdued text */
+  --vb-s-10: #464343;
+
+  /* ── Red — alert / destructive ──────────────────────────── */
+  --vb-re-02: #fad2d7;
+  --vb-re-04: #f07882;
+  --vb-re-05: #dc1e32; /* alert */
+  --vb-re-07: #a51428;
+  --vb-re-10: #6e0f19;
+
+  /* ── Orange ─────────────────────────────────────────────── */
+  --vb-or-02: #ffe1d2;
+  --vb-or-04: #ffaa78;
+  --vb-or-05: #fa6414;
+  --vb-or-07: #be4b0f;
+  --vb-or-10: #7d320a;
+
+  /* ── Yellow — notice ────────────────────────────────────── */
+  --vb-ye-02: #fff0d2;
+  --vb-ye-04: #ffd278;
+  --vb-ye-05: #ffb91e;
+  --vb-ye-07: #be8c14; /* notice */
+  --vb-ye-10: #825a0f;
+
+  /* ── Yellow-green ───────────────────────────────────────── */
+  --vb-yg-02: #e6f0d2;
+  --vb-yg-04: #b4dc7d;
+  --vb-yg-05: #82c31e;
+  --vb-yg-07: #50961e;
+  --vb-yg-10: #3c5f14;
+
+  /* ── Green — success ────────────────────────────────────── */
+  --vb-gr-02: #cdebd7;
+  --vb-gr-04: #64be8c;
+  --vb-gr-05: #00963c;
+  --vb-gr-07: #006e2d;
+  --vb-gr-10: #004b1e;
+
+  /* ── Blue-green ─────────────────────────────────────────── */
+  --vb-bg-02: #cdf0f0;
+  --vb-bg-04: #64d2d2;
+  --vb-bg-05: #00b9b9;
+  --vb-bg-07: #008c8c;
+  --vb-bg-10: #146464;
+
+  /* ── Purple ─────────────────────────────────────────────── */
+  --vb-pu-02: #e6d7fa;
+  --vb-pu-04: #b482f0;
+  --vb-pu-05: #733ce6;
+  --vb-pu-07: #5a2daa;
+  --vb-pu-10: #3c1e73;
+
+  /* ── Greyscale (text & UI structure) ────────────────────── */
+  --vb-gy-01: #fbfbfb;
+  --vb-gy-02: #dcdcdc;
+  --vb-gy-04: #a0a0a0;
+  --vb-gy-05: #5a5a5a;
+  --vb-gy-07: #323232; /* normal body text */
+  --vb-gy-10: #1e1e1e;
+
+  /* ── Semantic aliases — prefer these in components ──────── */
+  --color-primary: var(--vb-p-07);
+  --color-primary-hover: var(--vb-p-08);
+  --color-primary-active: var(--vb-p-09);
+  --color-brand: var(--vb-p-05);
+  --color-accent: var(--vb-p-04);
+  --color-link: var(--vb-p-07);
+  --color-link-hover: var(--vb-p-09);
+
+  --color-alert: var(--vb-re-05);
+  --color-alert-hover: var(--vb-re-07);
+  --color-notice: var(--vb-ye-07);
+  --color-success: var(--vb-gr-05);
+
+  --color-text: var(--vb-gy-07);          /* default body */
+  --color-text-subdued: var(--vb-s-09);   /* burnt — lower-emphasis */
+  --color-text-disabled: var(--vb-s-08);
+  --color-text-on-primary: #ffffff;
+  --color-text-on-dark: #ffffff;
+
+  --color-bg-page: var(--vb-p-01);        /* freee page bg — pale blue */
+  --color-bg-column: var(--vb-s-01);      /* column / sectioned surface */
+  --color-bg-surface: #ffffff;            /* cards / dialogs / popups */
+  --color-bg-hover-soft: var(--vb-s-02);
+
+  --color-border: var(--vb-gy-02);
+  --color-border-strong: var(--vb-s-08);
+  --color-border-input: var(--vb-gy-02);
+
+  --color-scrim: rgba(0, 0, 0, 0.5);
+  --color-scrim-thin: rgba(0, 0, 0, 0.12);
+
+  --color-focus-ring: var(--vb-p-05);
+}

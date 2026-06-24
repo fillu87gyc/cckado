@@ -1,0 +1,50 @@
+@import './styles/ds/fonts.css';
+@import './styles/ds/colors.css';
+@import './styles/ds/typography.css';
+@import './styles/ds/spacing.css';
+@import './styles/ds/elevation.css';
+@import './styles/ds/motion.css';
+@import './styles/ds/base.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family-body);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "palt" 1;
+}
+
+/* Internal CSS variables remapped to Vibes tokens.
+   Keeps the prototype's markup/logic untouched while inheriting the freee palette. */
+:root {
+  --bg: var(--color-bg-page);          /* P1 — pale blue page */
+  --bg-panel: var(--color-bg-column);  /* S1 — sand grey column */
+  --bg-sink: var(--vb-s-02);           /* S2 — slightly sunk surface */
+  --bg-card: var(--color-bg-surface);  /* white card surface */
+  --ink: var(--color-text);            /* GY7 — body text */
+  --ink-2: var(--vb-gy-05);            /* GY5 — secondary text */
+  --ink-3: var(--color-text-subdued);  /* S9 — subdued text */
+  --rule: var(--color-border);         /* GY2 — dividers */
+  --rule-strong: var(--vb-s-04);
+  --accent: var(--color-primary);      /* P7 — interactive blue */
+  --accent-soft: var(--vb-p-02);
+  --alert: var(--vb-re-05);            /* RE5 — destructive / interrupt */
+  --alert-soft: var(--vb-re-02);
+  --sea: var(--vb-bg-07);              /* teal — secondary chart hue */
+  --notice: var(--vb-ye-07);
+  --ai: var(--accent);                 /* AI work — freee blue */
+  --human: var(--sea);                 /* human / manual — teal */
+  --interrupt: var(--vb-or-05);        /* interrupt — orange */
+}
+
+/* freee-style focus ring */
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+  border-radius: var(--radius-focus);
+}
+
+#root {
+  min-height: 100vh;
+}

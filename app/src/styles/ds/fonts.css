@@ -1,0 +1,81 @@
+/* freee Vibes — Web fonts
+   Source: stylesheets/lv0/_fonts.scss — the freee logo is set in
+   Noto Sans JP Medium, served from Google Fonts. Body copy uses the OS's
+   native system + CJK fonts (no @font-face), so glyphs render at the
+   correct hinting and language fallback chain for each platform. */
+
+@font-face {
+  font-family: 'freee-logo';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Noto Sans CJK JP Medium'),
+    url(//fonts.gstatic.com/ea/notosansjp/v5/NotoSansJP-Medium.woff2)
+      format('woff2'),
+    url(//fonts.gstatic.com/ea/notosansjp/v5/NotoSansJP-Medium.woff)
+      format('woff'),
+    url(//fonts.gstatic.com/ea/notosansjp/v5/NotoSansJP-Medium.otf)
+      format('opentype');
+}
+
+/* System-font aliases — Hiragino is preinstalled on macOS/iOS, Meiryo on
+   Windows. We declare local()-only @font-face entries so the compiler
+   sees a face for these family names without us needing to upload any
+   binary; nothing is downloaded over the network. On Linux/ChromeOS,
+   the OS lacks both and the stack falls through to Noto Sans JP below. */
+@font-face {
+  font-family: 'ヒラギノ角ゴ ProN';
+  font-style: normal;
+  font-weight: 300 700;
+  src:
+    local('Hiragino Kaku Gothic ProN'),
+    local('ヒラギノ角ゴ ProN'),
+    local('HiraKakuProN-W3'),
+    local('HiraKakuProN-W6');
+}
+@font-face {
+  font-family: 'Hiragino Kaku Gothic ProN';
+  font-style: normal;
+  font-weight: 300 700;
+  src:
+    local('Hiragino Kaku Gothic ProN'),
+    local('ヒラギノ角ゴ ProN'),
+    local('HiraKakuProN-W3'),
+    local('HiraKakuProN-W6');
+}
+@font-face {
+  font-family: 'メイリオ';
+  font-style: normal;
+  font-weight: 400 700;
+  src: local('Meiryo'), local('メイリオ');
+}
+@font-face {
+  font-family: 'Meiryo';
+  font-style: normal;
+  font-weight: 400 700;
+  src: local('Meiryo'), local('メイリオ');
+}
+
+/* Noto Sans JP — Latin/CJK web fallback for OSes that lack
+   Hiragino / Meiryo (Linux, ChromeOS). On macOS / iOS / Windows the
+   `--font-family-body` stack picks up the OS-installed CJK font first. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+/* Material Icons — declared explicitly so we don't rely on Google's
+   @import-style CSS (which doesn't always chain through nested @imports
+   when the host stylesheet is served from a different origin). */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(https://fonts.gstatic.com/s/materialicons/v143/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Material Icons Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(https://fonts.gstatic.com/s/materialiconsoutlined/v110/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUce.woff2) format('woff2');
+}

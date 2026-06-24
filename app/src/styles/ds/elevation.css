@@ -1,0 +1,30 @@
+/* freee Vibes — Elevation (shadow) tokens
+   Source: stylesheets/lv0/_colors.scss — $vbCardShadow / Floating / Popup
+   freee uses three stacked shadow tiers (card → floating → popup) and an inset
+   double-ring focus halo with a 1px white bumper inside and outside the ring. */
+
+:root {
+  --shadow-card:
+    0 0 1rem rgba(0, 0, 0, 0.10),
+    0 0.125rem 0.25rem rgba(0, 0, 0, 0.20);
+
+  --shadow-floating:
+    0 0 1.5rem rgba(0, 0, 0, 0.10),
+    0 0.25rem 0.5rem rgba(0, 0, 0, 0.20);
+
+  --shadow-popup:
+    0 0 2rem rgba(0, 0, 0, 0.10),
+    0 0.375rem 0.75rem rgba(0, 0, 0, 0.20);
+
+  /* Focus rings — outer & inset variants.
+     Pattern: 1px white bumper → 2px brand-blue ring → 1px white bumper. */
+  --shadow-focus-ring:
+    0 0 0 1px #fff,
+    0 0 0 3px var(--color-focus-ring),
+    0 0 0 4px #fff;
+
+  --shadow-focus-ring-inset:
+    inset 0 0 0 1px #fff,
+    inset 0 0 0 3px var(--color-focus-ring),
+    inset 0 0 0 4px #fff;
+}
