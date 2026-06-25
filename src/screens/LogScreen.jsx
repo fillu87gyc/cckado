@@ -110,15 +110,12 @@ function DayView({ vm }) {
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
               {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
               <SubSectionTitle>当日の推移</SubSectionTitle>
-              <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>09:00 → 19:00 · session blocks &amp; interrupt ticks</span>
+              <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>08:00 → 20:00 · session blocks &amp; interrupt ticks</span>
             </div>
             {/* vibes-audit: 当日タイムライン(時刻目盛・セッションブロック・中断ティック)。
                実時刻に比例した絶対配置の帯で、vibes にタイムライン/ガント部品が無く素の div。 */}
-            {/* 勤務枠トラック(bg-sink)の上に、freee勤怠の残業表現として定時(18:00)以降を淡い黄で塗り、定時ラインを引く。 */}
+            {/* 勤務枠トラック(bg-sink)の上に時刻目盛とセッションブロックを描く。 */}
             <div style={{ position: 'relative', height: 64, borderTop: '1px solid var(--rule)', borderBottom: '1px solid var(--rule)', background: 'var(--bg-sink)' }}>
-              <div style={{ position: 'absolute', left: vm.overtimeStartPct, right: 0, top: 0, bottom: 16, background: 'color-mix(in oklab, var(--vb-ye-05) 22%, transparent)', pointerEvents: 'none' }}></div>
-              <div style={{ position: 'absolute', left: vm.overtimeStartPct, top: 0, bottom: 16, width: 1, background: 'var(--vb-ye-07)', opacity: .6, pointerEvents: 'none' }}></div>
-              <div style={{ position: 'absolute', left: vm.overtimeStartPct, top: 2, transform: 'translateX(4px)', fontFamily: 'var(--font-family-body)', fontSize: 9, color: 'var(--vb-ye-10)', letterSpacing: '.04em', pointerEvents: 'none' }}>定時 {vm.teiziLabel}〜残業</div>
               {vm.weekHourTicks.map((h, i) => (
                 <div key={i} style={{ position: 'absolute', left: h.leftPct, top: 0, bottom: 16, width: 1, background: 'var(--rule)', opacity: .6 }}></div>
               ))}
@@ -179,10 +176,8 @@ function DayView({ vm }) {
                 </div>
 
                 <div style={{ position: 'relative', height: 48 }}>
-                  {/* 勤務枠トラック(09:00–19:00) + freee勤怠の残業帯(定時18:00以降を淡い黄)+定時ライン。 */}
+                  {/* 勤務枠トラック(8:00–20:00)。 */}
                   <div style={{ position: 'absolute', left: 0, right: 0, top: 8, bottom: 18, background: 'var(--bg-sink)', borderRadius: 3, pointerEvents: 'none' }}></div>
-                  <div style={{ position: 'absolute', left: vm.overtimeStartPct, right: 0, top: 8, bottom: 18, background: 'color-mix(in oklab, var(--vb-ye-05) 22%, transparent)', borderRadius: '0 3px 3px 0', pointerEvents: 'none' }}></div>
-                  <div style={{ position: 'absolute', left: vm.overtimeStartPct, top: 6, bottom: 18, width: 1, background: 'var(--vb-ye-07)', opacity: .6, pointerEvents: 'none' }}></div>
                   {vm.dayHourTicks.map((h, i) => (
                     <div key={i} style={{ position: 'absolute', left: h.leftPct, top: 6, bottom: 18, width: 1, background: 'var(--rule)', opacity: .5 }}></div>
                   ))}
@@ -393,7 +388,7 @@ function WeekView({ vm }) {
           {vm.weekDayCols.map((c, i) => (
             <div key={i} style={{ position: 'absolute', left: c.leftPct, width: c.widthPct, top: 0, bottom: 0, background: c.cellBg, borderRight: '1px solid var(--rule)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 16, lineHeight: 1, color: c.labelColor }}>{c.dateNum}<span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 400, marginLeft: 4 }}>{c.wd}</span></div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.04em', marginTop: 3 }}>09 — 19</div>
+              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.04em', marginTop: 3 }}>08 — 20</div>
             </div>
           ))}
         </div>
@@ -443,7 +438,7 @@ function WeekView({ vm }) {
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 14 }}>
         {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
         <SubSectionTitle>一週間の推移</SubSectionTitle>
-        <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>each row is one day, 09:00 → 19:00 · click to drill in</span>
+        <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>each row is one day, 08:00 → 20:00 · click to drill in</span>
       </div>
 
       {/* vibes-audit: 1 日 1 行のドリルダウン可能なリスト。各行が複数レーンの時刻軸タイムライン
@@ -463,9 +458,7 @@ function WeekView({ vm }) {
             </div>
             <div>
               <div style={{ position: 'relative', border: '1px solid var(--rule)', background: 'var(--bg-sink)' }}>
-                {/* freee勤怠の残業帯: 定時(18:00)以降を淡い黄で塗り、定時ラインを全レーンに通す。勤務枠トラックは bg-sink。 */}
-                <div style={{ position: 'absolute', left: vm.overtimeStartPct, right: 0, top: 0, bottom: 0, background: 'color-mix(in oklab, var(--vb-ye-05) 20%, transparent)', pointerEvents: 'none', zIndex: 0 }}></div>
-                <div style={{ position: 'absolute', left: vm.overtimeStartPct, top: 0, bottom: 0, width: 1, background: 'var(--vb-ye-07)', opacity: .55, pointerEvents: 'none', zIndex: 3 }}></div>
+                {/* 勤務枠トラック(bg-sink)。 */}
                 {vm.weekHourTicks.map((h, hi) => (
                   <div key={hi} style={{ position: 'absolute', left: h.leftPct, top: 0, bottom: 0, width: 1, background: 'var(--rule)', opacity: .5, pointerEvents: 'none', zIndex: 2 }}></div>
                 ))}
@@ -499,7 +492,6 @@ function WeekView({ vm }) {
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--ai)' }}></span>AI セッション</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--human)' }}></span>手動セッション</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ display: 'inline-block', width: 2, height: 12, background: 'var(--interrupt)' }}></span>中断 (interrupt)</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ display: 'inline-block', width: 12, height: 8, background: 'color-mix(in oklab, var(--vb-ye-05) 22%, transparent)', borderLeft: '1px solid var(--vb-ye-07)' }}></span>残業 (定時 {vm.teiziLabel}〜)</span>
         <span style={{ flex: 1, height: 1, background: 'var(--rule)' }}></span>
         <span>日付クリックで日次ビューへ ↗</span>
       </div>

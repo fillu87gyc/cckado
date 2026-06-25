@@ -208,8 +208,8 @@ function renderVals(s, actions) {
   ];
 
   // -- Log: sessions with subagent lanes --
-  const dayStart = 9 * 60;
-  const dayEnd = 19 * 60;
+  const dayStart = 8 * 60;
+  const dayEnd = 20 * 60;
   const dayMin = dayEnd - dayStart;
   const scaleX = (m) => ((m - dayStart) / dayMin) * 100;
   const fmt = (m) => {
@@ -445,10 +445,10 @@ function renderVals(s, actions) {
   const selectedSess = sessionsRich[s.selectedSession] || sessionsRich[0];
 
   const hourTicks = [];
-  for (let h = 9; h <= 19; h++) {
+  for (let h = 8; h <= 20; h++) {
     hourTicks.push({ h, leftPct: scaleX(h * 60).toFixed(2) + '%', label: String(h).padStart(2, '0') + ':00' });
   }
-  const dayHourTicks = [9, 11, 13, 15, 17, 19].map((h) => ({
+  const dayHourTicks = [8, 10, 12, 14, 16, 18, 20].map((h) => ({
     h,
     leftPct: scaleX(h * 60).toFixed(2) + '%',
     label: String(h).padStart(2, '0'),
@@ -757,11 +757,11 @@ function renderVals(s, actions) {
     const ints = dayInterruptsFor(d);
     const offFromToday = Math.round((d.getTime() - baseDate.getTime()) / (24 * 3600 * 1000));
     const sessBars = sess.map((b) => ({
-      leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-      widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+      widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
       bg: b.ai ? 'var(--ai)' : 'var(--human)',
     }));
-    const intTicks = ints.map((m) => ({ leftPct: (((m - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%' }));
+    const intTicks = ints.map((m) => ({ leftPct: (((m - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%' }));
     const dayLanesRaw = weekBranches
       .map((br) => {
         const onDay = br.sessions.filter((s2) => s2.day === i);
@@ -771,13 +771,13 @@ function renderVals(s, actions) {
     const dayLanes = dayLanesRaw.map((l) => ({
       name: l.name,
       bars: l.sessions.map((b) => ({
-        leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-        widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+        leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+        widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
         bg: b.ai ? 'var(--ai)' : 'var(--human)',
       })),
     }));
     let dayConcPeak = 0;
-    for (let m = 9 * 60; m < 19 * 60; m += 30) {
+    for (let m = 8 * 60; m < 20 * 60; m += 30) {
       let n = 0;
       dayLanesRaw.forEach((l) => {
         if (l.sessions.some((s2) => s2.s <= m && s2.e > m)) n++;
@@ -831,7 +831,7 @@ function renderVals(s, actions) {
       total = 0,
       samples = 0;
     for (let day = 0; day < 7; day++) {
-      for (let m = 9 * 60; m < 19 * 60; m += 30) {
+      for (let m = 8 * 60; m < 20 * 60; m += 30) {
         let n = 0;
         branches.forEach((br) => {
           if (br.sessions.some((s2) => s2.day === day && s2.s <= m && s2.e > m)) n++;
@@ -847,7 +847,7 @@ function renderVals(s, actions) {
   };
 
   const weekConc = computePeakConcurrent(weekBranches);
-  const weekTotalMins = 7 * 600;
+  const weekTotalMins = 7 * 720;
   const weekBranchesRich = weekBranches.map((br) => {
     const totalMin = br.sessions.reduce((a, s2) => a + (s2.e - s2.s), 0);
     const distinctDays = new Set(br.sessions.map((s2) => s2.day)).size;
@@ -858,7 +858,7 @@ function renderVals(s, actions) {
       durLabel: totalMin >= 60 ? Math.floor(totalMin / 60) + 'h ' + pad2(totalMin % 60) + 'm' : totalMin + 'm',
       distinctDays,
       bars: br.sessions.map((blk) => ({
-        leftPct: (((blk.day * 600 + (blk.s - 9 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
+        leftPct: (((blk.day * 720 + (blk.s - 8 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
         widthPct: (((blk.e - blk.s) / weekTotalMins) * 100).toFixed(3) + '%',
         bg: blk.ai ? 'var(--ai)' : 'var(--human)',
       })),
@@ -880,13 +880,13 @@ function renderVals(s, actions) {
   });
   const weekConcSamples = [];
   for (let day = 0; day < 7; day++) {
-    for (let m = 9 * 60; m < 19 * 60; m += 30) {
+    for (let m = 8 * 60; m < 20 * 60; m += 30) {
       let n = 0;
       weekBranches.forEach((br) => {
         if (br.sessions.some((s2) => s2.day === day && s2.s <= m && s2.e > m)) n++;
       });
       weekConcSamples.push({
-        leftPct: (((day * 600 + (m - 9 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
+        leftPct: (((day * 720 + (m - 8 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
         widthPct: ((30 / weekTotalMins) * 100).toFixed(3) + '%',
         n,
         heightPct: ((n / Math.max(weekConc.peak, 1)) * 100).toFixed(1) + '%',
@@ -896,8 +896,8 @@ function renderVals(s, actions) {
   }
   const weekBranchCount = weekBranches.length;
 
-  const weekHourTicks = [9, 11, 13, 15, 17, 19].map((h) => ({
-    leftPct: (((h - 9) / 10) * 100).toFixed(2) + '%',
+  const weekHourTicks = [8, 10, 12, 14, 16, 18, 20].map((h) => ({
+    leftPct: (((h - 8) / 12) * 100).toFixed(2) + '%',
     label: pad2(h),
   }));
 
@@ -1153,10 +1153,6 @@ function renderVals(s, actions) {
     selectedSess,
     hourTicks,
     dayHourTicks,
-    // freee人事労務・勤怠の「所定/残業」表現に倣う: 定時=18:00。これ以降を残業帯として塗る。
-    // 勤務枠(09:00–19:00)上での 18:00 の位置 (%)。各タイムラインで残業帯/定時ラインの基準にする。
-    overtimeStartPct: scaleX(18 * 60).toFixed(2) + '%',
-    teiziLabel: '18:00',
     branchRows,
     totalSessionsLabel,
     totalSessions,
@@ -1182,12 +1178,12 @@ function renderVals(s, actions) {
     dayViewPeak: isToday_ ? 4 : viewedDateStats.peak,
     dayViewPrs: isToday_ ? 1 : viewedDateStats.prs,
     viewedDayBars: daySessionsFor(viewedDate).map((b) => ({
-      leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-      widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+      widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
       bg: b.ai ? 'var(--ai)' : 'var(--human)',
     })),
     viewedIntTicks: dayInterruptsFor(viewedDate).map((m) => ({
-      leftPct: (((m - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((m - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
     })),
     weekHourTicks,
     shiftDayPrev: shiftDay(-1),
