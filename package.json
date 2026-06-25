@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "serve": "node server/index.mjs",
+    "dev:all": "concurrently -k -n server,web \"npm:serve\" \"npm:dev\"",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@freee_jp/vibes": "^100.1.0",
+    "@hono/node-server": "^2.0.6",
+    "hono": "^4.12.27",
     "lottie-web": "^5.12.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -21,6 +25,7 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.0.2",
+    "concurrently": "^10.0.3",
     "oxlint": "^1.69.0",
     "vite": "^8.1.0"
   }

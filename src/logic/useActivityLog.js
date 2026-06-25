@@ -1,11 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-// Verbatim port of the prototype's `state` + action methods + renderVals().
-// Kept as close to the original structure/order as practical so the
-// interdependencies (e.g. "weekBranches computed early so weekDays can
-// reference it") are preserved.
+// Port of the prototype's `state` + action methods + renderVals(), now fed by
+// real data fetched from the local devstyle server (/api/activity). The pure
+// view-math in renderVals() is unchanged; only the *source facts* (sessions,
+// weeks, per-day stats, compass density, …) now come from `data` instead of
+// hardcoded arrays.
 
 export function useActivityLog() {
+  const [data, setData] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [project, setProject] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    setData(null);
+    setLoadError(null);
+    const qs = project ? `?project=${encodeURIComponent(project)}` : '';
+    fetch(`/api/activity${qs}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => {
+        if (alive) setData(d);
+      })
+      .catch((e) => {
+        if (alive) setLoadError(e.message || String(e));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [project]);
+
   const [state, setState] = useState({
     screen: 'index',
     selectedSession: 0,
@@ -54,7 +80,7 @@ export function useActivityLog() {
     window.addEventListener('pointerup', onUp);
   };
 
-  const vm = renderVals(state, {
+  const actions = {
     selectSession,
     selectType,
     setLogView,
@@ -69,12 +95,55 @@ export function useActivityLog() {
     go,
     onScrubDown,
     setState: patch,
-  });
+    setProject,
+  };
 
+  // Until data arrives, return a minimal vm so the chrome (nav) renders and the
+  // screens show a loading/error state instead of crashing on missing arrays.
+  if (!data) {
+    return {
+      ...loadingVm(state, actions),
+      isLoading: !loadError,
+      loadError,
+    };
+  }
+
+  const vm = renderVals(state, actions, data);
+  vm.isLoading = false;
+  vm.loadError = null;
+  vm.projects = data.meta.projects || [];
+  vm.currentProject = project;
+  vm.setProject = setProject;
   return vm;
 }
 
-function renderVals(s, actions) {
+// Nav items + screen flags only — enough for App to render the header/tabs
+// while data is loading or failed.
+function loadingVm(s, actions) {
+  const screens = ['index', 'today', 'log', 'compass', 'quarter'];
+  const navJp = { index: '序', today: '本日', log: '日誌', compass: '分布', quarter: '四半期推移' };
+  const navEn = { index: 'Index', today: 'Today', log: 'Log', compass: 'Compass', quarter: 'Quarter' };
+  const navIcon = { index: 'menu_book', today: 'today', log: 'list_alt', compass: 'donut_small', quarter: 'insights' };
+  const navItems = screens.map((sc) => ({
+    jp: navJp[sc],
+    en: navEn[sc],
+    icon: navIcon[sc],
+    go: actions.go(sc),
+    iconOpacity: s.screen === sc ? 1 : 0.7,
+  }));
+  return {
+    navItems,
+    currentNavIndex: screens.indexOf(s.screen),
+    headerLine: '— · —',
+    isIndex: false,
+    isToday: false,
+    isLog: false,
+    isCompass: false,
+    isQuarter: false,
+  };
+}
+
+function renderVals(s, actions, data) {
   const { selectSession, selectType, shiftDay, shiftWeek, shiftMonth, jumpToDay, toggleDatePicker, selectBranch, deselectBranch, go, onScrubDown, setState } = actions;
 
   const screens = ['index', 'today', 'log', 'compass', 'quarter'];
@@ -100,17 +169,12 @@ function renderVals(s, actions) {
     { num: '04', jp: '四半期推移', en: 'Quarterly Report', page: 'p.20', lede: 'Q2 (4月～6月) の推移。スクラブ・ヒートマップ・型遷移・ツール構成。', go: go('quarter') },
   ];
 
-  const todayStats = [
-    { label: '作業時間', value: '6:42', unit: 'h', sub: 'うち AI 4:30 / 手動 2:12' },
-    { label: 'セッション', value: '5', unit: '件', sub: 'メインスレッド 5 / subagent 12' },
-    { label: '並列ピーク', value: '4', unit: '隻', sub: '13:20 頃、平均 2.3' },
-    { label: '中断', value: '6', unit: '件', sub: '09:52 / 10:34 / 11:40 / 13:42 / 14:20 / 16:12' },
-  ];
+  const todayStats = data.todayStats;
 
   // -- § 1 AI vs Manual: horizontal split bar + activity breakdown --
-  const aiSumAi = 270; // 4h 30m
-  const aiSumMn = 132; // 2h 12m
-  const aiSumTotal = aiSumAi + aiSumMn;
+  const aiSumAi = data.aiSumAi; // tool-active minutes (today)
+  const aiSumMn = data.aiSumMn; // idle / wait minutes (today)
+  const aiSumTotal = aiSumAi + aiSumMn || 1;
   const aiPct = Math.round((aiSumAi / aiSumTotal) * 100);
   const mnPct = 100 - aiPct;
   const aiHours = Math.floor(aiSumAi / 60);
@@ -118,35 +182,32 @@ function renderVals(s, actions) {
   const mnHours = Math.floor(aiSumMn / 60);
   const mnMins = aiSumMn % 60;
 
-  const aiActivities = [
-    { label: 'Edit', mins: 96 },
-    { label: 'Task', mins: 78 },
-    { label: 'Read · Grep', mins: 54 },
-    { label: 'Bash', mins: 42 },
-  ];
-  const mnActivities = [{ label: '(内訳の自動取得なし)', mins: 132 }];
+  const aiActivities = data.aiActivities;
+  const mnActivities = data.mnActivities;
   const fmtMins = (m) => {
     const h = Math.floor(m / 60),
       mm = m % 60;
     return h > 0 ? h + 'h ' + String(mm).padStart(2, '0') + 'm' : mm + 'm';
   };
+  const aiSideDiv = aiSumAi || 1;
+  const mnSideDiv = aiSumMn || 1;
   const aiActsRich = aiActivities.map((a) => ({
     ...a,
-    pctOfSide: ((a.mins / aiSumAi) * 100).toFixed(2) + '%',
+    pctOfSide: ((a.mins / aiSideDiv) * 100).toFixed(2) + '%',
     pctOfTotal: ((a.mins / aiSumTotal) * 100).toFixed(2) + '%',
-    pctOfSideNum: Math.round((a.mins / aiSumAi) * 100),
+    pctOfSideNum: Math.round((a.mins / aiSideDiv) * 100),
     durLabel: fmtMins(a.mins),
   }));
   const mnActsRich = mnActivities.map((a) => ({
     ...a,
-    pctOfSide: ((a.mins / aiSumMn) * 100).toFixed(2) + '%',
+    pctOfSide: ((a.mins / mnSideDiv) * 100).toFixed(2) + '%',
     pctOfTotal: ((a.mins / aiSumTotal) * 100).toFixed(2) + '%',
-    pctOfSideNum: Math.round((a.mins / aiSumMn) * 100),
+    pctOfSideNum: Math.round((a.mins / mnSideDiv) * 100),
     durLabel: fmtMins(a.mins),
   }));
   const aiBarWidthPct = ((aiSumAi / aiSumTotal) * 100).toFixed(3) + '%';
   const mnBarWidthPct = ((aiSumMn / aiSumTotal) * 100).toFixed(3) + '%';
-  const totalMinAxis = [0, 60, 120, 180, 240, 300, 360, aiSumTotal];
+  const totalMinAxis = [...[0, 60, 120, 180, 240, 300, 360].filter((m) => m < aiSumTotal), aiSumTotal];
   const minAxisTicks = totalMinAxis.map((m) => ({
     m,
     label: fmtMins(m),
@@ -155,8 +216,8 @@ function renderVals(s, actions) {
   }));
 
   // -- § 2 Parallel: discrete step bars with Y guidelines --
-  const parData = [1, 1, 2, 2, 2, 3, 3, 2, 3, 4, 3, 2, 2, 2, 1, 1];
-  const maxPar = 4;
+  const parData = data.parData && data.parData.length ? data.parData : [0];
+  const maxPar = Math.max(1, ...parData);
   const parChartW = 400,
     parChartH = 140;
   const parPadL = 28,
@@ -201,11 +262,7 @@ function renderVals(s, actions) {
     return { level, count, pct: Math.round((count / parData.length) * 100) };
   });
 
-  const highlights = [
-    { time: '10:42', title: '型推論バグの隔壁、突破', kind: '実装 · main session' },
-    { time: '13:20', title: '並列 4 件に達す · ピーク', kind: '計測点 · subagent 並列' },
-    { time: '15:38', title: 'PR #341 をマージ', kind: 'マージ · merge' },
-  ];
+  const highlights = data.highlights || [];
 
   // -- Log: sessions with subagent lanes --
   const dayStart = 8 * 60;
@@ -218,132 +275,7 @@ function renderVals(s, actions) {
     return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
   };
 
-  const sessions = [
-    {
-      id: 'S1',
-      branch: 'feat/types',
-      title: '型推論バグの調査と修正',
-      repo: 'app-core/src/infer.ts',
-      start: 9 * 60 + 8,
-      end: 11 * 60 + 15,
-      aiPct: 72,
-      tools: 38,
-      aiMin: 88,
-      planMin: 12,
-      waitMin: 27,
-      initial: 'app-core で起きている型推論の取りこぼしを調べたい。最小再現と原因の特定まで。',
-      main: [
-        { kind: 'read', s: 9 * 60 + 8, e: 9 * 60 + 22 },
-        { kind: 'edit', s: 9 * 60 + 22, e: 9 * 60 + 45 },
-        { kind: 'bash', s: 9 * 60 + 45, e: 9 * 60 + 52 },
-        { kind: 'read', s: 9 * 60 + 52, e: 10 * 60 + 18 },
-        { kind: 'edit', s: 10 * 60 + 18, e: 10 * 60 + 42 },
-        { kind: 'bash', s: 10 * 60 + 42, e: 10 * 60 + 48 },
-        { kind: 'edit', s: 10 * 60 + 48, e: 11 * 60 + 15 },
-      ],
-      subagents: [
-        { name: 'grep-1', delegation: 'type generics 利用箇所の網羅探索', tasks: [{ kind: 'grep', s: 9 * 60 + 25, e: 9 * 60 + 38 }] },
-        { name: 'task-1', delegation: '最小再現テストの試作', tasks: [{ kind: 'task', s: 10 * 60 + 5, e: 10 * 60 + 30 }] },
-      ],
-      interrupts: [
-        { t: '09:52', msg: '再現条件もう少し絞ってほしい — 関数型のジェネリクスだけ?' },
-        { t: '10:34', msg: 'fix は別 PR で。まず再現テストだけ追加して' },
-      ],
-    },
-    {
-      id: 'S2',
-      branch: 'review/338',
-      title: 'PR レビュー #338 と修正コメント',
-      repo: 'app-core/PR#338',
-      start: 11 * 60 + 22,
-      end: 12 * 60 + 8,
-      aiPct: 38,
-      tools: 14,
-      aiMin: 18,
-      planMin: 0,
-      waitMin: 22,
-      pr: { num: 338, status: 'review' },
-      initial: 'PR #338 をレビュー。設計とテスト網羅性を確認、修正コメントを下書き。',
-      main: [
-        { kind: 'read', s: 11 * 60 + 22, e: 11 * 60 + 48 },
-        { kind: 'edit', s: 11 * 60 + 48, e: 12 * 60 + 8 },
-      ],
-      subagents: [],
-      interrupts: [{ t: '11:40', msg: 'コメントは個別 review じゃなくまとめて投げて' }],
-    },
-    {
-      id: 'S3',
-      branch: 'feat/cache',
-      title: 'cache 層のリファクタ — fleet 並列',
-      repo: 'app-core/src/cache/*',
-      start: 13 * 60 + 5,
-      end: 14 * 60 + 50,
-      aiPct: 81,
-      tools: 47,
-      aiMin: 84,
-      planMin: 4,
-      waitMin: 17,
-      initial: 'cache 層を 3 ファイルに分けて、TTL の扱いを統一。並列で進めて。',
-      main: [
-        { kind: 'read', s: 13 * 60 + 5, e: 13 * 60 + 18 },
-        { kind: 'edit', s: 13 * 60 + 18, e: 13 * 60 + 40 },
-        { kind: 'bash', s: 13 * 60 + 40, e: 13 * 60 + 45 },
-        { kind: 'edit', s: 13 * 60 + 45, e: 14 * 60 + 12 },
-        { kind: 'bash', s: 14 * 60 + 12, e: 14 * 60 + 18 },
-        { kind: 'edit', s: 14 * 60 + 18, e: 14 * 60 + 50 },
-      ],
-      subagents: [
-        { name: 'task-2', delegation: 'cache/lru.ts への分割実装', tasks: [{ kind: 'task', s: 13 * 60 + 8, e: 13 * 60 + 38 }] },
-        { name: 'task-3', delegation: 'cache/ttl.ts で TTL ロジックを統一', tasks: [{ kind: 'task', s: 13 * 60 + 15, e: 13 * 60 + 52 }] },
-        { name: 'task-4', delegation: 'cache/index.ts のエクスポート整理', tasks: [{ kind: 'task', s: 13 * 60 + 25, e: 14 * 60 + 8 }] },
-      ],
-      interrupts: [
-        { t: '13:42', msg: 'TTL の default は env から取らせて — hard-code はやめて' },
-        { t: '14:20', msg: 'subagent #2 の方針、テストファイル一本化したい' },
-      ],
-    },
-    {
-      id: 'S4',
-      branch: 'docs/recap',
-      title: '設計ノートの整理と次週の計画',
-      repo: 'docs/q2-recap.md',
-      start: 15 * 60,
-      end: 15 * 60 + 32,
-      aiPct: 22,
-      tools: 6,
-      aiMin: 7,
-      planMin: 0,
-      waitMin: 0,
-      initial: '今週の振り返りを docs にまとめる。次週のテーマも 3 行で。',
-      main: [{ kind: 'edit', s: 15 * 60, e: 15 * 60 + 32 }],
-      subagents: [],
-      interrupts: [],
-    },
-    {
-      id: 'S5',
-      branch: 'release/cache',
-      title: 'PR #341 の最終調整とマージ',
-      repo: 'app-core/PR#341',
-      start: 15 * 60 + 38,
-      end: 16 * 60 + 45,
-      aiPct: 64,
-      tools: 18,
-      aiMin: 43,
-      planMin: 0,
-      waitMin: 12,
-      pr: { num: 341, status: 'merged' },
-      initial: 'PR #341 (cache リファクタ) の lint と test を通して merge へ。',
-      main: [
-        { kind: 'bash', s: 15 * 60 + 38, e: 15 * 60 + 45 },
-        { kind: 'edit', s: 15 * 60 + 45, e: 16 * 60 + 10 },
-        { kind: 'bash', s: 16 * 60 + 10, e: 16 * 60 + 18 },
-        { kind: 'edit', s: 16 * 60 + 18, e: 16 * 60 + 38 },
-        { kind: 'bash', s: 16 * 60 + 38, e: 16 * 60 + 45 },
-      ],
-      subagents: [{ name: 'task-5', delegation: 'lint エラーの一括修正と test 再走', tasks: [{ kind: 'task', s: 15 * 60 + 50, e: 16 * 60 + 15 }] }],
-      interrupts: [{ t: '16:12', msg: 'merge は squash じゃなく rebase で' }],
-    },
-  ];
+  const sessions = data.focalSessions || [];
 
   // 稼働(=労働)系のツールは freee勤怠の「労働=単色 teal」に倣い、すべて teal の濃淡で表現する。
   // task(並列実装) は最も濃い teal、read→edit→bash→grep と淡くなるランプ。
@@ -609,7 +541,9 @@ function renderVals(s, actions) {
   const totalSessionsLabel = String(sessions.length).padStart(2, '0');
 
   // -- Day/Week/Month helpers --
-  const baseDate = new Date(2026, 5, 19); // 2026-06-19 Fri = "today"
+  // "today" = latest activity date from the ingested data.
+  const [by, bm, bd] = (data.meta.today || '').split('-').map(Number);
+  const baseDate = new Date(by || 2026, (bm || 1) - 1, bd || 1);
   const addDays = (d, n) => {
     const r = new Date(d);
     r.setDate(r.getDate() + n);
@@ -628,68 +562,26 @@ function renderVals(s, actions) {
     setState({ dayOffset: Math.min(off, 0), datePickerOpen: false });
   };
 
-  const hashStr = (str) => {
-    let h = 2166136261;
-    for (let i = 0; i < str.length; i++) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return Math.abs(h);
-  };
-  const rngFor = (d, k = '') => {
-    let h = hashStr(fmtDateFull(d) + '|' + k);
-    return () => {
-      h = (h * 1103515245 + 12345) & 0x7fffffff;
-      return h / 0x7fffffff;
-    };
-  };
+  // Per-day facts come from the ingested data; missing days render as empty.
+  const daily = data.daily || {};
+  const ZERO_DAY = { hours: 0, mins: 0, aiPct: 0, sessions: 0, subagents: 0, prs: 0, peak: 0, interrupts: 0, tools: 0 };
   const dayStatsFor = (d) => {
-    const r = rngFor(d);
-    const we = isWeekend(d);
-    const isToday = d.getTime() === baseDate.getTime();
-    if (isToday) {
-      return { hours: 6.7, mins: 402, aiPct: 67, sessions: 5, subagents: 8, prs: 1, peak: 4, interrupts: 6, tools: 123 };
-    }
-    const hours = we ? +(r() * 2.0).toFixed(1) : +(3.5 + r() * 4).toFixed(1);
-    const sess = we ? Math.floor(r() * 2) : 2 + Math.floor(r() * 5);
+    const dd = daily[fmtISO(d)];
+    if (!dd) return ZERO_DAY;
     return {
-      hours,
-      mins: Math.round(hours * 60),
-      aiPct: Math.round(45 + r() * 38),
-      sessions: sess,
-      subagents: sess ? Math.floor(r() * sess * 2.5) : 0,
-      prs: r() < 0.55 ? 0 : 1 + Math.floor(r() * 2),
-      peak: sess === 0 ? 0 : 1 + Math.floor(r() * Math.min(4, sess + 1)),
-      interrupts: sess === 0 ? 0 : Math.floor(r() * 5),
-      tools: sess === 0 ? 0 : 20 + Math.floor(r() * 80),
+      hours: dd.hours,
+      mins: dd.mins,
+      aiPct: dd.aiPct,
+      sessions: dd.sessions,
+      subagents: dd.subagents,
+      prs: dd.prs,
+      peak: dd.peak,
+      interrupts: dd.interrupts,
+      tools: dd.tools,
     };
   };
-  const daySessionsFor = (d) => {
-    const stats = dayStatsFor(d);
-    if (stats.sessions === 0) return [];
-    const r = rngFor(d, 'sess');
-    const out = [];
-    let cursor = 9 * 60 + Math.floor(r() * 30);
-    for (let i = 0; i < stats.sessions; i++) {
-      const dur = 25 + Math.floor(r() * 90);
-      const start = cursor;
-      const end = Math.min(start + dur, 19 * 60 - 5);
-      out.push({ s: start, e: end, ai: r() < stats.aiPct / 100 });
-      cursor = end + 10 + Math.floor(r() * 40);
-      if (cursor > 18 * 60) break;
-    }
-    return out;
-  };
-  const dayInterruptsFor = (d) => {
-    const stats = dayStatsFor(d);
-    const r = rngFor(d, 'int');
-    const out = [];
-    for (let i = 0; i < stats.interrupts; i++) {
-      const m = 9 * 60 + 30 + Math.floor(r() * (9 * 60));
-      out.push(m);
-    }
-    return out.sort((a, b) => a - b);
-  };
+  const daySessionsFor = (d) => (daily[fmtISO(d)]?.bars || []);
+  const dayInterruptsFor = (d) => (daily[fmtISO(d)]?.intMins || []);
 
   const viewedDate = addDays(baseDate, s.dayOffset);
   const viewedDateStats = dayStatsFor(viewedDate);
@@ -702,53 +594,25 @@ function renderVals(s, actions) {
   const weekStartOffset = (weekBase.getDay() + 6) % 7;
   const weekStart = addDays(weekBase, -weekStartOffset);
 
-  // weekBranches computed early so weekDays can reference it
-  const weekBranchPool = [
-    'feat/types', 'feat/cache', 'feat/ui-polish', 'feat/streaming',
-    'review/338', 'review/341', 'review/355',
-    'fix/auth', 'fix/dnd-bug',
-    'docs/recap', 'release/cache', 'chore/deps', 'exp/agent-flow', 'test/integration',
-  ];
-  const weekBranchActivity_ = (weekStartDate) => {
-    const r = rngFor(weekStartDate, 'wkbr');
-    const nBr = 6 + Math.floor(r() * 3);
-    const pool = [...weekBranchPool];
-    const branches = [];
-    for (let i = 0; i < nBr; i++) {
-      if (!pool.length) break;
-      const idx = Math.floor(r() * pool.length);
-      branches.push({
-        name: pool.splice(idx, 1)[0],
-        sessions: [],
-        aiTendency: 0.4 + r() * 0.5,
-        activityRate: 0.45 + r() * 0.45,
-      });
-    }
+  // weekBranches computed early so weekDays can reference it. Built from the
+  // ingested per-day lanes (sessions grouped by gitBranch).
+  const buildWeekBranches = (weekStartDate) => {
+    const map = new Map();
     for (let day = 0; day < 7; day++) {
       const d = addDays(weekStartDate, day);
-      if (d.getTime() > baseDate.getTime()) continue;
-      const we = isWeekend(d);
-      branches.forEach((br, brI) => {
-        const rB = rngFor(d, 'br' + brI);
-        const dayActive = we ? rB() < 0.18 : rB() < br.activityRate;
-        if (!dayActive) return;
-        const nBlocks = 1 + Math.floor(rB() * (we ? 1.2 : 2.6));
-        for (let k = 0; k < nBlocks; k++) {
-          const dur = 25 + Math.floor(rB() * 110);
-          const latestStart = 19 * 60 - dur;
-          const earliestStart = 9 * 60;
-          if (latestStart <= earliestStart) continue;
-          const ss = earliestStart + Math.floor(rB() * (latestStart - earliestStart));
-          const ee = ss + dur;
-          br.sessions.push({ day, s: ss, e: ee, ai: rB() < br.aiTendency });
-        }
+      const dd = daily[fmtISO(d)];
+      if (!dd) continue;
+      (dd.lanes || []).forEach((l) => {
+        if (!map.has(l.name)) map.set(l.name, []);
+        l.sessions.forEach((ss) => map.get(l.name).push({ day, s: ss.s, e: ss.e, ai: ss.ai }));
       });
     }
-    return branches
+    return [...map.entries()]
+      .map(([name, sessions]) => ({ name, sessions }))
       .filter((b) => b.sessions.length > 0)
       .sort((a, b) => b.sessions.reduce((x, ss) => x + (ss.e - ss.s), 0) - a.sessions.reduce((x, ss) => x + (ss.e - ss.s), 0));
   };
-  const weekBranches = weekBranchActivity_(weekStart);
+  const weekBranches = buildWeekBranches(weekStart);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = addDays(weekStart, i);
@@ -974,8 +838,8 @@ function renderVals(s, actions) {
     { i: 7, name: '自力並列', en: 'Solo Pair', row: 2, col: 1, ai: '自力中心', par: '2 セッション' },
     { i: 8, name: '分散', en: 'Scatter', row: 2, col: 2, ai: '自力中心', par: '3+ セッション' },
   ];
-  const cellDensity = [3, 6, 14, 8, 18, 28, 5, 9, 11];
-  const maxD = Math.max(...cellDensity);
+  const cellDensity = data.compass && data.compass.length === 9 ? data.compass : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const maxD = Math.max(1, ...cellDensity);
 
   const typeCells = types.map((t) => {
     const d = cellDensity[t.i];
@@ -999,27 +863,13 @@ function renderVals(s, actions) {
   const oppositeType = typeCells[oppositeIdx];
 
   // -- Quarter: 13 weeks of Q2 --
-  const weeks = [
-    { w: 14, hr: 32, ai: 0.51, pr: 2, peak: 2, type: 4, label: '4/1', dayCon: [2, 2, 1, 1, 2, 0, 0], dayInt: [3, 4, 2, 1, 3, 0, 0], tools: { read: 62, edit: 48, bash: 34, task: 5, grep: 22 } },
-    { w: 15, hr: 28, ai: 0.55, pr: 1, peak: 2, type: 4, label: '4/8', dayCon: [1, 2, 2, 1, 2, 0, 0], dayInt: [2, 3, 3, 1, 2, 0, 0], tools: { read: 55, edit: 42, bash: 30, task: 6, grep: 20 } },
-    { w: 16, hr: 35, ai: 0.58, pr: 3, peak: 3, type: 4, label: '4/15', dayCon: [2, 3, 2, 2, 2, 1, 0], dayInt: [3, 5, 3, 2, 3, 1, 0], tools: { read: 70, edit: 55, bash: 32, task: 9, grep: 25 } },
-    { w: 17, hr: 41, ai: 0.61, pr: 3, peak: 3, type: 4, label: '4/22', dayCon: [3, 3, 2, 3, 2, 1, 0], dayInt: [4, 5, 3, 4, 3, 1, 0], tools: { read: 82, edit: 64, bash: 38, task: 12, grep: 30 } },
-    { w: 18, hr: 38, ai: 0.6, pr: 2, peak: 3, type: 4, label: '4/29', dayCon: [2, 3, 3, 2, 1, 1, 0], dayInt: [3, 4, 4, 3, 2, 0, 0], tools: { read: 76, edit: 60, bash: 36, task: 10, grep: 28 } },
-    { w: 19, hr: 22, ai: 0.65, pr: 1, peak: 2, type: 3, label: '5/6', dayCon: [1, 2, 1, 1, 2, 0, 0], dayInt: [2, 3, 1, 1, 2, 0, 0], tools: { read: 48, edit: 38, bash: 24, task: 7, grep: 18 } },
-    { w: 20, hr: 30, ai: 0.62, pr: 2, peak: 3, type: 4, label: '5/13', dayCon: [2, 2, 3, 2, 2, 1, 0], dayInt: [3, 3, 4, 2, 3, 1, 0], tools: { read: 62, edit: 50, bash: 30, task: 11, grep: 22 } },
-    { w: 21, hr: 33, ai: 0.66, pr: 2, peak: 3, type: 5, label: '5/20', dayCon: [2, 3, 3, 2, 2, 1, 0], dayInt: [3, 4, 5, 3, 3, 1, 0], tools: { read: 68, edit: 54, bash: 32, task: 14, grep: 24 } },
-    { w: 22, hr: 36, ai: 0.68, pr: 3, peak: 4, type: 5, label: '5/27', dayCon: [3, 4, 3, 3, 2, 1, 0], dayInt: [4, 5, 4, 4, 3, 1, 0], tools: { read: 74, edit: 58, bash: 34, task: 18, grep: 26 } },
-    { w: 23, hr: 28, ai: 0.7, pr: 2, peak: 3, type: 5, label: '6/3', dayCon: [3, 3, 3, 2, 2, 0, 0], dayInt: [3, 4, 4, 3, 3, 0, 0], tools: { read: 60, edit: 46, bash: 28, task: 16, grep: 22 } },
-    { w: 24, hr: 30, ai: 0.69, pr: 2, peak: 3, type: 5, label: '6/10', dayCon: [2, 3, 3, 3, 2, 1, 0], dayInt: [3, 4, 5, 4, 3, 1, 0], tools: { read: 64, edit: 50, bash: 30, task: 17, grep: 24 } },
-    { w: 25, hr: 34, ai: 0.67, pr: 3, peak: 4, type: 5, label: '6/17', dayCon: [3, 3, 4, 3, 2, 1, 0], dayInt: [3, 4, 5, 4, 3, 1, 0], tools: { read: 72, edit: 56, bash: 32, task: 20, grep: 26 } },
-    { w: 26, hr: 29, ai: 0.68, pr: 2, peak: 3, type: 5, label: '6/24', dayCon: [3, 3, 3, 2, 2, 0, 0], dayInt: [4, 4, 4, 3, 3, 0, 0], tools: { read: 62, edit: 48, bash: 28, task: 18, grep: 22 } },
-  ];
+  const weeks = data.weeks && data.weeks.length ? data.weeks : [{ w: 0, hr: 0, ai: 0, pr: 0, peak: 0, type: 4, label: '—', dayCon: [0, 0, 0, 0, 0, 0, 0], dayInt: [0, 0, 0, 0, 0, 0, 0], tools: { read: 0, edit: 0, bash: 0, task: 0, grep: 0 } }];
   const typeNames = ['集中', '探索', '高委任並列', '対話協働', 'バランス', '協働並列', '自力', '自力並列', '分散'];
 
   const cW = 1000, cH = 220, padL = 50, padR = 30, padT = 20, padB = 40;
   const innerW = cW - padL - padR;
   const innerH = cH - padT - padB;
-  const xAt = (i) => padL + (i / (weeks.length - 1)) * innerW;
+  const xAt = (i) => padL + (i / (weeks.length - 1 || 1)) * innerW;
   const maxHr = 45;
   const hrY = (hr) => padT + (1 - hr / maxHr) * innerH;
   const aiY = (ai) => padT + (1 - ai) * innerH;
@@ -1043,7 +893,7 @@ function renderVals(s, actions) {
     { x: xAt(11).toFixed(1), y1: padT.toFixed(1), label: 'ピーク並列 4' },
   ];
 
-  const sw = Math.max(0, Math.min(12, s.scrubWeek));
+  const sw = Math.max(0, Math.min(weeks.length - 1, s.scrubWeek));
   const scrubX = xAt(sw).toFixed(1);
   const scrubWeekData = weeks[sw];
   const scrubHrY = hrY(scrubWeekData.hr).toFixed(1);
@@ -1120,14 +970,7 @@ function renderVals(s, actions) {
     return { ...k, v, pct: ((v / total) * 100).toFixed(0) };
   });
 
-  const quarterStats = [
-    { label: '最長集中', value: '68', unit: '分', sub: 'W22 火 14:20–15:28' },
-    { label: '最長中断', value: '42', unit: '分', sub: 'W17 金 PR レビュー' },
-    { label: '平均並列度', value: '2.4', unit: '隻', sub: '実働時間で重みづけ' },
-    { label: 'Subagent', value: '164', unit: '回', sub: 'Task ツール起動回数' },
-    { label: 'PR レビュー', value: '31', unit: '件', sub: 'うち自分発 26' },
-    { label: '再着手', value: '18', unit: '回', sub: '同セッションの再開' },
-  ];
+  const quarterStats = data.quarterStats || [];
 
   return {
     isIndex: s.screen === 'index',
@@ -1137,6 +980,12 @@ function renderVals(s, actions) {
     isQuarter: s.screen === 'quarter',
     navItems,
     currentNavIndex: screens.indexOf(s.screen),
+    headerLine:
+      baseDate.getFullYear() +
+      ' Q' + (Math.floor(baseDate.getMonth() / 3) + 1) +
+      ' · W' + (weeks[weeks.length - 1]?.w ?? 0) +
+      ' · ' + (baseDate.getMonth() + 1) + '/' + baseDate.getDate() +
+      ' (' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][baseDate.getDay()] + ')',
     tocItems,
     todayStats,
     aiPct, mnPct,
@@ -1169,14 +1018,14 @@ function renderVals(s, actions) {
     isNotToday: !isToday_,
     viewedDateStats,
     headerDateLabel: dayLabel + (isToday_ ? ' · 本日' : ' · archived'),
-    dayViewHours: isToday_ ? '6.7' : viewedDateStats.hours.toFixed(1),
-    dayViewAiPct: isToday_ ? 67 : viewedDateStats.aiPct,
-    dayViewSessions: isToday_ ? sessions.length : viewedDateStats.sessions,
-    dayViewSubagents: isToday_ ? sessions.reduce((a, s2) => a + s2.subagents.length, 0) : viewedDateStats.subagents,
-    dayViewTools: isToday_ ? sessions.reduce((a, s2) => a + s2.tools, 0) : viewedDateStats.tools,
-    dayViewInterrupts: isToday_ ? sessions.reduce((a, s2) => a + s2.interrupts.length, 0) : viewedDateStats.interrupts,
-    dayViewPeak: isToday_ ? 4 : viewedDateStats.peak,
-    dayViewPrs: isToday_ ? 1 : viewedDateStats.prs,
+    dayViewHours: viewedDateStats.hours.toFixed(1),
+    dayViewAiPct: viewedDateStats.aiPct,
+    dayViewSessions: viewedDateStats.sessions,
+    dayViewSubagents: viewedDateStats.subagents,
+    dayViewTools: viewedDateStats.tools,
+    dayViewInterrupts: viewedDateStats.interrupts,
+    dayViewPeak: viewedDateStats.peak,
+    dayViewPrs: viewedDateStats.prs,
     viewedDayBars: daySessionsFor(viewedDate).map((b) => ({
       leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
       widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',

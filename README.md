@@ -1,6 +1,24 @@
-# React + Vite
+# 稼働ログ / Activity Log
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Claude Code のローカルログ (`~/.claude.json` と `~/.claude/projects/**/*.jsonl`) を
+パースして、開発スタイルを可視化するダッシュボード (PRD: AI Development Style Visualizer)。
+
+## 実行
+
+```sh
+npm install
+npm run dev:all   # Hono データサーバ (127.0.0.1:8787) + Vite を同時起動
+```
+
+- `npm run serve` … データサーバのみ。`--port` / `--claude-home` を指定可。
+  別ホームのログを見る場合: `CLAUDE_HOME=/path/to/.claude npm run serve`
+- `npm run dev` … フロントのみ (`/api` は `:8787` にプロキシ)。
+
+データは外部送信せず、すべてローカルで処理される。
+
+---
+
+This project was bootstrapped from the React + Vite template (HMR + Oxlint).
 
 Currently, two official plugins are available:
 
