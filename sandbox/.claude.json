@@ -1,0 +1,18 @@
+{
+  "userID": "sandbox-user-0001",
+  "numStartups": 42,
+  "projects": {
+    "/home/dev/acme-web": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep"],
+      "mcpServers": {
+        "github": { "command": "github-mcp" },
+        "playwright": { "command": "playwright-mcp" }
+      },
+      "history": [{ "display": "ログイン画面を実装して" }]
+    },
+    "/home/dev/billing-api": {
+      "allowedTools": ["Read", "Bash(pytest *)"],
+      "mcpServers": {}
+    }
+  }
+}
