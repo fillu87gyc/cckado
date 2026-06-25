@@ -1,16 +1,21 @@
-import { ToggleButton, IconOnlyButton, Button, FullScreenModal, DatePicker } from '@freee_jp/vibes';
-import { MdChevronLeft, MdChevronRight, MdToday, MdCalendarToday } from 'react-icons/md';
+import { ToggleButton, IconOnlyButton, Button, FullScreenModal, DateInput, SelectBox, SectionTitle, SubSectionTitle } from '@freee_jp/vibes';
+import { MdChevronLeft, MdChevronRight, MdToday } from 'react-icons/md';
 
 export default function LogScreen({ vm }) {
   return (
+    // vibes-audit: 画面枠 (padding/maxWidth 1280px) は vibes Container の離散幅に合わず素 article。
     <article data-screen-label="稼働ログ / Log" style={{ padding: '48px 48px 96px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 18, borderBottom: '1px solid var(--color-border)', paddingBottom: 14 }}>
-        <h2 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 22, letterSpacing: '.06em', margin: 0 }}>稼働ログ</h2>
+        {/* 見出しを vibes SectionTitle (<h2>) へ移行。 */}
+        <SectionTitle>稼働ログ</SectionTitle>
         <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, color: 'var(--ink-3)', letterSpacing: '.04em' }}>The Logbook</span>
         <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.08em' }}>{vm.headerDateLabel}</span>
       </div>
 
-      {/* Day / Week / Month sub-nav + date navigator */}
+      {/* Day / Week / Month sub-nav + date navigator
+         note: トグル/前後送り/本日/日付選択は既に vibes(ToggleButton, IconOnlyButton, Button,
+         DatePicker)へ移行済み。外側の帯(背景パネル/角丸)と中央の日付ラベルのみ vibes 化不可:
+         vibes に「ツールバー」コンテナは無く、ラベルの 11px/16px は Text の固定サイズ外。 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, marginBottom: 28, padding: '14px 18px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ display: 'flex' }}>
           {vm.logViewItems.map((it) => (
@@ -29,40 +34,35 @@ export default function LogScreen({ vm }) {
         </div>
 
         {vm.isLogDay && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
+          // freee人事労務の日付選択に倣い、自前ポップアップ+DatePicker を vibes DateInput
+          // (カレンダー内蔵の日付フィールド) に置換。フォーカス/カレンダーアイコンでカレンダーが開き、
+          // テキスト編集も可能。表示は「YYYY年M月D日」、onChange は 'YYYY-MM-DD' を返すため jumpToDate と整合。
+          // 前後送り(chevron)と「本日へ」は freee の日付ナビ同様に併置する。
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <IconOnlyButton IconComponent={MdChevronLeft} label="前日へ" appearance="secondary" small onClick={vm.shiftDayPrev} />
-            <div style={{ textAlign: 'center', minWidth: 200 }}>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.dayLabel}</div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>{vm.dayLabelShort}</div>
-            </div>
+            <DateInput value={vm.viewedDateISO} maxDate={vm.maxDateISO} width="medium" onChange={vm.onDatePickerSelect} aria-label="日付を選択" />
             <IconOnlyButton IconComponent={MdChevronRight} label="翌日へ" appearance="secondary" small disabled={vm.dayNextDisabled} onClick={vm.shiftDayNext} />
             <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" onClick={vm.shiftDayToToday}>本日へ</Button>
-            <IconOnlyButton IconComponent={MdCalendarToday} label="日付を選択" appearance="secondary" small onClick={vm.toggleDatePicker} />
-            {vm.datePickerOpen && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, zIndex: 10, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', borderRadius: 'var(--radius-card)' }}>
-                <DatePicker date={vm.viewedDateISO} maxDate={vm.maxDateISO} onDateClick={vm.onDatePickerSelect} />
-              </div>
-            )}
           </div>
         )}
         {vm.isLogWeek && (
+          // freee人事労務の期間選択に倣い、週は SelectBox の期間ピッカー + 前後送り(chevron) + 「今週へ」。
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.weekRangeLabel}</span>
             <IconOnlyButton IconComponent={MdChevronLeft} label="前週へ" appearance="secondary" small onClick={vm.shiftWeekPrev} />
-            <div style={{ textAlign: 'center', minWidth: 200 }}>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.weekRangeLabel}</div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>第{vm.weekLabel} 週</div>
-            </div>
+            <SelectBox label="週を選択" value={vm.weekPickerValue} options={vm.weekPickerOptions} onChange={vm.onWeekPick} width="small" />
             <IconOnlyButton IconComponent={MdChevronRight} label="翌週へ" appearance="secondary" small disabled={vm.weekNextDisabled} onClick={vm.shiftWeekNext} />
+            <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" disabled={vm.weekIsThis} onClick={vm.shiftWeekToThis}>今週へ</Button>
           </div>
         )}
         {vm.isLogMonth && (
+          // freee人事労務の期間選択に倣い、月は SelectBox の月ピッカー + 前後送り(chevron) + 「今月へ」。
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.monthLabelEn}</span>
             <IconOnlyButton IconComponent={MdChevronLeft} label="前月へ" appearance="secondary" small onClick={vm.shiftMonthPrev} />
-            <div style={{ textAlign: 'center', minWidth: 200 }}>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.monthLabelEn}</div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>{vm.monthLabel}</div>
-            </div>
+            <SelectBox label="月を選択" value={vm.monthPickerValue} options={vm.monthPickerOptions} onChange={vm.onMonthPick} width="medium" />
             <IconOnlyButton IconComponent={MdChevronRight} label="翌月へ" appearance="secondary" small disabled={vm.monthNextDisabled} onClick={vm.shiftMonthNext} />
+            <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" disabled={vm.monthIsThis} onClick={vm.shiftMonthToThis}>今月へ</Button>
           </div>
         )}
       </div>
@@ -78,6 +78,8 @@ function DayView({ vm }) {
   return (
     <>
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--rule)' }}>
+        {/* vibes-audit: 統計ストリップ(影/角丸はカード相当)。CardBase は固定 24px padding を
+           挿入し端まで届く罫線区切りセルを壊すため使えず、30px の数値も vibes Text 外。素 grid で残す。 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 0, background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
           <div style={{ padding: '18px 16px', borderRight: '1px solid var(--rule)' }}>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.06em' }}>作業時間</div>
@@ -106,15 +108,19 @@ function DayView({ vm }) {
         <>
           <div style={{ marginBottom: 24, padding: 24, background: 'var(--bg-panel)', borderRadius: 'var(--radius-card)' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 15, letterSpacing: '.02em', margin: 0 }}>当日の推移</h3>
-              <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>09:00 → 19:00 · session blocks &amp; interrupt ticks</span>
+              {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+              <SubSectionTitle>当日の推移</SubSectionTitle>
+              <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>08:00 → 20:00 · session blocks &amp; interrupt ticks</span>
             </div>
+            {/* vibes-audit: 当日タイムライン(時刻目盛・セッションブロック・中断ティック)。
+               実時刻に比例した絶対配置の帯で、vibes にタイムライン/ガント部品が無く素の div。 */}
+            {/* 勤務枠トラック(bg-sink)の上に時刻目盛とセッションブロックを描く。 */}
             <div style={{ position: 'relative', height: 64, borderTop: '1px solid var(--rule)', borderBottom: '1px solid var(--rule)', background: 'var(--bg-sink)' }}>
               {vm.weekHourTicks.map((h, i) => (
                 <div key={i} style={{ position: 'absolute', left: h.leftPct, top: 0, bottom: 16, width: 1, background: 'var(--rule)', opacity: .6 }}></div>
               ))}
               {vm.viewedDayBars.map((b, i) => (
-                <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 22, background: b.bg, opacity: .9 }}></div>
+                <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 22, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
               ))}
               {vm.viewedIntTicks.map((it, i) => (
                 <div key={i} style={{ position: 'absolute', left: it.leftPct, top: 4, height: 30, width: 2, background: 'var(--interrupt)', transform: 'translateX(-50%)' }}></div>
@@ -137,6 +143,8 @@ function DayView({ vm }) {
             </div>
           </div>
 
+          {/* vibes-audit: アーカイブ告知パネル。vibes Message は左アイコン+背景色の固定様式で、
+             この中央寄せ・改行・アクセント語強調のエディトリアルな体裁にはならないため素の div。 */}
           <div style={{ padding: '32px 24px', border: '1px solid var(--color-border)', textAlign: 'center', color: 'var(--ink-3)' }}>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, letterSpacing: '.04em', marginBottom: 8 }}>ARCHIVED</div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 14, letterSpacing: '.06em', lineHeight: 1.7 }}>
@@ -148,6 +156,9 @@ function DayView({ vm }) {
 
       {vm.isToday_ && (
         <>
+          {/* vibes-audit: ブランチ行リスト。各行が「ラベル＋PRバッジ＋時刻軸タイムライン(セッション帯/
+             中断ティック/PRマーカー/選択枠)」を内包するクリック可能な可視化行。vibes の ListButton/
+             TableListRow ではこの内部タイムライン描画を表現できないため素の <button>+絶対配置で残す。 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, borderTop: '1px solid var(--rule)', marginBottom: 8 }}>
             {vm.branchRows.map((r) => (
               <button key={r.idx} onClick={r.select} style={{ display: 'block', width: '100%', padding: '18px 22px 14px', border: 'none', borderBottom: '1px solid var(--rule)', background: r.rowBg, cursor: 'pointer', textAlign: 'left', color: 'inherit', fontFamily: 'inherit' }}>
@@ -165,6 +176,8 @@ function DayView({ vm }) {
                 </div>
 
                 <div style={{ position: 'relative', height: 48 }}>
+                  {/* 勤務枠トラック(8:00–20:00)。 */}
+                  <div style={{ position: 'absolute', left: 0, right: 0, top: 8, bottom: 18, background: 'var(--bg-sink)', borderRadius: 3, pointerEvents: 'none' }}></div>
                   {vm.dayHourTicks.map((h, i) => (
                     <div key={i} style={{ position: 'absolute', left: h.leftPct, top: 6, bottom: 18, width: 1, background: 'var(--rule)', opacity: .5 }}></div>
                   ))}
@@ -172,7 +185,7 @@ function DayView({ vm }) {
                     <div style={{ position: 'absolute', left: `calc(${r.leftPct} - 8px)`, width: `calc(${r.widthPct} + 16px)`, top: 8, bottom: 18, border: '1px solid var(--accent)', borderRadius: 14 }}></div>
                   )}
                   {r.dayBars.map((b, i) => (
-                    <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 14, background: 'var(--ai)', opacity: .85 }}></div>
+                    <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 14, background: 'var(--ai)', opacity: .85, borderRadius: 3 }}></div>
                   ))}
                   {r.interruptTicks.map((it, i) => (
                     <div key={i} style={{ position: 'absolute', left: it.leftPct, top: 2, height: 14, width: 2, background: 'var(--interrupt)', transform: 'translateX(-50%)' }}></div>
@@ -219,14 +232,19 @@ function BranchActivityModal({ row }) {
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10 }}>
             <span style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--ink)', alignSelf: 'center' }}></span>
-            <h4 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 700, fontSize: 13, letterSpacing: '.04em', margin: 0, color: 'var(--ink)' }}>メインスレッド ／ subagent</h4>
+            {/* 見出しを vibes SubSectionTitle (h4 レベル) へ移行。 */}
+            <SubSectionTitle headlineLevel={4}>メインスレッド ／ subagent</SubSectionTitle>
             <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.08em' }}>flame stack on session timeline</span>
           </div>
 
+          {/* vibes-audit: メインスレッド×subagent のフレームスタック(セッションタイムライン上に
+             フェーズ帯を積層)。実時間に比例した絶対配置の帯と中断オーバーレイで構成される可視化で、
+             vibes に該当部品が無いため素の grid+絶対配置で描画する。 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 110px', gap: 14, alignItems: 'center' }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink)', letterSpacing: '.04em', textAlign: 'right' }}>メインスレッド</div>
-              <div style={{ position: 'relative', height: 30, border: '1px solid var(--rule)', background: 'var(--bg)', overflow: 'hidden' }}>
+              {/* freee勤怠の勤務バーに倣い、バー全体を角丸に (overflow:hidden で内部フェーズの端も丸く clip)。 */}
+              <div style={{ position: 'relative', height: 30, border: '1px solid var(--rule)', background: 'var(--bg)', overflow: 'hidden', borderRadius: 3 }}>
                 {r.phasesRich.map((p, i) => (
                   <div key={i} title={p.label} style={{ position: 'absolute', top: 0, bottom: 0, left: p.leftPct, width: p.widthPct, background: p.bg }}></div>
                 ))}
@@ -246,7 +264,7 @@ function BranchActivityModal({ row }) {
                 <div style={{ position: 'relative', height: 20 }}>
                   <div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}></div>
                   {sa.tasksLocal.map((t, ti) => (
-                    <div key={ti} style={{ position: 'absolute', top: 2, bottom: 2, left: t.leftPct, width: t.widthPct, background: t.bg }}></div>
+                    <div key={ti} style={{ position: 'absolute', top: 2, bottom: 2, left: t.leftPct, width: t.widthPct, background: t.bg, borderRadius: 3 }}></div>
                   ))}
                 </div>
                 <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.04em' }}>
@@ -302,6 +320,8 @@ function BranchActivityModal({ row }) {
         {r.hasInterrupts && (
           <div style={{ paddingTop: 18, borderTop: '1px solid var(--color-border)' }}>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.08em', marginBottom: 10 }}>INTERRUPTS · {r.interruptCount}</div>
+            {/* vibes-audit: 中断タイムスタンプのピル群。vibes に Tag/Chip/Badge コンポーネントは
+               無く (export 済みは AppStore/GooglePlay バッジ画像のみ) ため pill は素の div で描画。 */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {r.interrupts.map((it, i) => (
                 <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'var(--accent-soft)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-full)', fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--accent)', letterSpacing: '.04em' }}>{it.t}</div>
@@ -317,6 +337,8 @@ function BranchActivityModal({ row }) {
 function WeekView({ vm }) {
   return (
     <>
+      {/* vibes-audit: 統計ストリップ。CardBase の固定 padding と vibes Text の固定サイズでは
+         端まで届く罫線区切りセル+30px 数値を再現できないため素 grid (DayView と同理由)。 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 0, background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-card)', overflow: 'hidden', marginBottom: 32 }}>
         <div style={{ padding: '18px 16px', borderRight: '1px solid var(--rule)' }}>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.06em' }}>週合計 時間</div>
@@ -348,7 +370,8 @@ function WeekView({ vm }) {
       <div style={{ marginBottom: 40, paddingBottom: 32, borderBottom: '1px solid var(--rule)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 14, marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
-            <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 15, letterSpacing: '.02em', margin: 0 }}>ブランチの並行稼働</h3>
+            {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+            <SubSectionTitle>ブランチの並行稼働</SubSectionTitle>
             <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>main threads stacked · who ran in parallel with whom</span>
           </div>
           <div style={{ display: 'flex', gap: 24, fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-2)', letterSpacing: '.04em' }}>
@@ -358,11 +381,14 @@ function WeekView({ vm }) {
           </div>
         </div>
 
+        {/* vibes-audit: 週間の並行稼働ビュー(曜日カラム見出し→並列度の面→ブランチ別タイムライン行)。
+           実時間に比例した絶対配置の帯を多段に積むガント/フレーム可視化で、vibes に該当部品が無いため
+           ここから下のブランチ行ブロックまで一貫して素の div+絶対配置で描画する。 */}
         <div style={{ position: 'relative', height: 46, border: '1px solid var(--color-border)', borderBottom: 'none', background: 'var(--bg-panel)' }}>
           {vm.weekDayCols.map((c, i) => (
             <div key={i} style={{ position: 'absolute', left: c.leftPct, width: c.widthPct, top: 0, bottom: 0, background: c.cellBg, borderRight: '1px solid var(--rule)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 16, lineHeight: 1, color: c.labelColor }}>{c.dateNum}<span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 400, marginLeft: 4 }}>{c.wd}</span></div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.04em', marginTop: 3 }}>09 — 19</div>
+              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.04em', marginTop: 3 }}>08 — 20</div>
             </div>
           ))}
         </div>
@@ -390,7 +416,7 @@ function WeekView({ vm }) {
                   <div key={ci} style={{ position: 'absolute', left: c.leftPct, width: c.widthPct, top: 0, bottom: 0, background: c.cellBg, borderRight: '1px solid var(--rule)' }}></div>
                 ))}
                 {br.bars.map((b, bi) => (
-                  <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 6, height: 16, background: b.bg, opacity: .9 }}></div>
+                  <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 6, height: 16, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
                 ))}
               </div>
               <div style={{ padding: '8px 12px', textAlign: 'right', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-2)', letterSpacing: '.04em', borderLeft: '1px solid var(--rule)' }}>
@@ -410,10 +436,14 @@ function WeekView({ vm }) {
 
       {/* § 2 — Week day rows */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 14 }}>
-        <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 15, letterSpacing: '.02em', margin: 0 }}>一週間の推移</h3>
-        <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>each row is one day, 09:00 → 19:00 · click to drill in</span>
+        {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+        <SubSectionTitle>一週間の推移</SubSectionTitle>
+        <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>each row is one day, 08:00 → 20:00 · click to drill in</span>
       </div>
 
+      {/* vibes-audit: 1 日 1 行のドリルダウン可能なリスト。各行が複数レーンの時刻軸タイムライン
+         (レーン別セッション帯/中断ティック/時刻目盛)を内包する可視化行で、vibes の行コンポーネントでは
+         この内部描画を表現できないため素の <button>+絶対配置で残す。 */}
       <div style={{ borderTop: '1px solid var(--color-border)' }}>
         {vm.weekDays.map((d, i) => (
           <button key={i} onClick={d.jumpToDay} style={{ display: 'grid', gridTemplateColumns: '80px 130px 1fr 110px', gap: 18, alignItems: 'start', width: '100%', padding: '16px 14px', border: 'none', borderBottom: '1px solid var(--rule)', background: d.rowBg, cursor: 'pointer', textAlign: 'left', color: 'inherit', fontFamily: 'inherit', opacity: d.opacity }}>
@@ -428,6 +458,7 @@ function WeekView({ vm }) {
             </div>
             <div>
               <div style={{ position: 'relative', border: '1px solid var(--rule)', background: 'var(--bg-sink)' }}>
+                {/* 勤務枠トラック(bg-sink)。 */}
                 {vm.weekHourTicks.map((h, hi) => (
                   <div key={hi} style={{ position: 'absolute', left: h.leftPct, top: 0, bottom: 0, width: 1, background: 'var(--rule)', opacity: .5, pointerEvents: 'none', zIndex: 2 }}></div>
                 ))}
@@ -435,7 +466,7 @@ function WeekView({ vm }) {
                   <div key={li} style={{ position: 'relative', height: 14, borderBottom: '1px solid color-mix(in oklab, var(--rule) 50%, transparent)' }}>
                     <span style={{ position: 'absolute', left: 6, top: 0, bottom: 0, display: 'flex', alignItems: 'center', fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.02em', zIndex: 3, pointerEvents: 'none', textShadow: '0 0 3px var(--bg-sink), 0 0 3px var(--bg-sink)' }}>{lane.name}</span>
                     {lane.bars.map((b, bi) => (
-                      <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 2, height: 10, background: b.bg, opacity: .9, borderRadius: 1 }}></div>
+                      <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 2, height: 10, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
                     ))}
                   </div>
                 ))}
@@ -471,6 +502,8 @@ function WeekView({ vm }) {
 function MonthView({ vm }) {
   return (
     <>
+      {/* vibes-audit: 統計ストリップ。CardBase の固定 padding/vibes Text の固定サイズでは
+         端まで届く罫線区切りセル+30px 数値を再現できないため素 grid (DayView と同理由)。 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 0, background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-card)', overflow: 'hidden', marginBottom: 32 }}>
         <div style={{ padding: '18px 16px', borderRight: '1px solid var(--rule)' }}>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.06em' }}>月合計 時間</div>
@@ -499,10 +532,14 @@ function MonthView({ vm }) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 14 }}>
-        <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 15, letterSpacing: '.02em', margin: 0 }}>カレンダー / {vm.monthLabel}</h3>
+        {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+        <SubSectionTitle>カレンダー / {vm.monthLabel}</SubSectionTitle>
         <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>intensity bar = hours / 8h · dot = PR · click to drill in</span>
       </div>
 
+      {/* vibes-audit: メトリクス内蔵の月カレンダー。vibes の DatePicker/CalendarDate は
+         「日付選択」専用で、各日セルに稼働量バー・AI比率・PRドット・セッション数を埋め込む
+         この可視化カレンダーには使えないため素の 7 列 grid で描画する。 */}
       <div style={{ border: '1px solid var(--color-border)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', background: 'var(--bg-panel)', borderBottom: '1px solid var(--color-border)' }}>
           {vm.monthCols.map((c, i) => (
@@ -517,8 +554,8 @@ function MonthView({ vm }) {
                 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{c.hoursLabel}<span style={{ opacity: .6 }}>h</span></span>
               </div>
               <div style={{ flex: 1, position: 'relative', height: 34, background: 'var(--bg-sink)' }}>
-                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '60%', height: c.barHeight, background: 'var(--ai)', opacity: .7 }}></div>
-                <div style={{ position: 'absolute', left: '60%', bottom: 0, width: '40%', height: c.aiBarWidth, background: 'var(--accent)', opacity: .5 }}></div>
+                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '60%', height: c.barHeight, background: 'var(--ai)', opacity: .7, borderRadius: '2px 2px 0 0' }}></div>
+                <div style={{ position: 'absolute', left: '60%', bottom: 0, width: '40%', height: c.aiBarWidth, background: 'var(--accent)', opacity: .5, borderRadius: '2px 2px 0 0' }}></div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-family-body)', fontSize: 9, color: 'var(--ink-3)', letterSpacing: '.04em' }}>
                 <span style={{ display: 'flex', gap: 3 }}>

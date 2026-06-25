@@ -4,6 +4,14 @@
    Hiragino / Meiryo for CJK so OS glyphs render natively. The freee logo
    wordmark is set in Noto Sans JP Medium. */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   vibes の `Text` はサイズが 0.75/0.875/1/1.5rem (12/14/16/24px) の 4 段に固定で、
+   letter-spacing を指定する API も持たない。本アプリのエディトリアルな型スケール
+   (9/10/11/13/18/22/28/30/32/36/54px) と字間トラッキング(.02–.14em)はこの 4 段では
+   表現できないため、ここで定義した font 変数が必要になる。
+   見出しの一部 (h1/h2/h3) は PageTitle/SectionTitle/SubSectionTitle へ移行済みだが、
+   それ以外の本文・キャプション・数値表示はサイズ/字間の制約で vibes 化できない。 */
+
 :root {
   /* ── Font families ──────────────────────────────────────── */
   --font-family-body:

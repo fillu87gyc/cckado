@@ -3,6 +3,14 @@
    Palette is organised as named hue scales (P, S, RE, OR, YE, YG, GR, BG, PU, GY)
    with 5–10 steps, plus semantic aliases used by every component. */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   `@freee_jp/vibes/css` は色を **コンポーネントのクラス内にリテラル値で焼き込んで** 出荷しており
+   (例: ブランド青 `#285ac8` がベタ書き、`var(--color-primary)` の類は 0 件)、
+   アプリ側から参照できる `:root` のカラーカスタムプロパティを一切公開していない。
+   このファイルの `--vb-*` / `--color-*` は、チャート・ヒートマップ・タイムラインなど
+   vibes コンポーネント化できない自前描画に freee パレットを供給する唯一の手段であり、
+   vibes をインポートするだけでは代替できない。値は vibes の SCSS と同期して維持する。 */
+
 :root {
   /* ── Primary (freee brand blue) ─────────────────────────── */
   --vb-p-01: #ebf3ff;

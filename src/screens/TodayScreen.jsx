@@ -1,12 +1,20 @@
+import { SectionTitle, SubSectionTitle } from '@freee_jp/vibes';
+
 export default function TodayScreen({ vm }) {
   return (
+    // vibes-audit: 画面枠 (padding/maxWidth 1280px) は vibes Container の離散幅に合わず素 article。
     <article data-screen-label="本日 / Today" style={{ padding: '48px 48px 96px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 28, borderBottom: '1px solid var(--color-border)', paddingBottom: 14 }}>
-        <h2 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 22, letterSpacing: '.06em', margin: 0 }}>本日</h2>
+        {/* 見出しを vibes SectionTitle (<h2>) へ移行 (22px→既定16px, design 多少変化を許容)。 */}
+        <SectionTitle>本日</SectionTitle>
         <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, color: 'var(--ink-3)', letterSpacing: '.04em' }}>Today's Edition</span>
         <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.08em' }}>2026.06.19 (Fri)</span>
       </div>
 
+      {/* vibes-audit: 統計ストリップ。背景/角丸/影は vibes CardBase 相当だが、CardBase は
+         内側に固定 24px padding を挿入するため「端まで届く罫線区切りのセル」を表現できない
+         (セルごとに padding と borderRight を持つ設計が崩れる)。数値も 36px と vibes Text 外。
+         よってカード見た目は維持しつつ素の grid で残す。 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 0, background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-card)', overflow: 'hidden', marginBottom: 48 }}>
         {vm.todayStats.map((stat) => (
           <div key={stat.label} style={{ padding: '24px 22px', borderRight: '1px solid var(--rule)' }}>
@@ -22,7 +30,8 @@ export default function TodayScreen({ vm }) {
       {/* § 1 — AI vs Manual */}
       <div style={{ marginBottom: 48 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: 0 }}>AI と人手の時間配分</h3>
+          {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+          <SubSectionTitle>AI と人手の時間配分</SubSectionTitle>
           <div style={{ display: 'flex', gap: 20, fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)' }}>
             <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--accent)', verticalAlign: 'middle', marginRight: 6 }}></span>AI {vm.aiPct}% · {vm.aiHours}h {vm.aiMins}m</span>
             <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--sea)', verticalAlign: 'middle', marginRight: 6 }}></span>手動 {vm.mnPct}% · {vm.mnHours}h {vm.mnMins}m</span>
@@ -30,6 +39,9 @@ export default function TodayScreen({ vm }) {
           </div>
         </div>
 
+        {/* vibes-audit: AI/人手の時間配分を 1 本の帯で示す stacked proportion bar。
+           各セグメント幅が分単位の実データに比例し、内部にラベルを敷き詰める可視化で、
+           vibes に比率バー/スタックバー部品は無いため flex+% で自前描画する。 */}
         <div style={{ position: 'relative', height: 64, display: 'flex', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
           <div style={{ width: vm.aiBarWidthPct, height: '100%', display: 'flex', background: 'var(--accent)' }}>
             {vm.aiActsRich.map((a, i) => (
@@ -99,11 +111,14 @@ export default function TodayScreen({ vm }) {
       {/* § 2 — Parallel sessions */}
       <div style={{ marginBottom: 48 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: 0 }}>並列セッション (件数 · 30 分刻み)</h3>
+          {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+          <SubSectionTitle>並列セッション (件数 · 30 分刻み)</SubSectionTitle>
           <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)' }}>avg {vm.parAvg} 件 / peak {vm.maxPar} 件</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 32, alignItems: 'start' }}>
           <div>
+            {/* vibes-audit: 並列度の棒グラフ＋階段状の上端線＋peak 注記を SVG で描画。
+               vibes にチャート/グラフ描画コンポーネントは存在しないため SVG 直書きのみ。 */}
             <svg viewBox={`0 0 ${vm.parChartW} ${vm.parChartH}`} style={{ width: '100%', height: 'auto', fontFamily: 'var(--font-family-body)', display: 'block' }}>
               {vm.parYAxis.map((y, i) => (
                 <g key={i}>

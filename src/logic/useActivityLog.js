@@ -208,8 +208,8 @@ function renderVals(s, actions) {
   ];
 
   // -- Log: sessions with subagent lanes --
-  const dayStart = 9 * 60;
-  const dayEnd = 19 * 60;
+  const dayStart = 8 * 60;
+  const dayEnd = 20 * 60;
   const dayMin = dayEnd - dayStart;
   const scaleX = (m) => ((m - dayStart) / dayMin) * 100;
   const fmt = (m) => {
@@ -345,12 +345,14 @@ function renderVals(s, actions) {
     },
   ];
 
+  // 稼働(=労働)系のツールは freee勤怠の「労働=単色 teal」に倣い、すべて teal の濃淡で表現する。
+  // task(並列実装) は最も濃い teal、read→edit→bash→grep と淡くなるランプ。
   const toolColor = (k) =>
     ({
+      task: 'var(--vb-bg-10)',
       read: 'var(--ai)',
       edit: 'color-mix(in oklab, var(--ai) 78%, var(--bg))',
       bash: 'color-mix(in oklab, var(--ai) 56%, var(--bg))',
-      task: 'var(--accent)',
       grep: 'color-mix(in oklab, var(--ai) 40%, var(--bg))',
     }[k] || 'var(--ink-3)');
 
@@ -443,10 +445,10 @@ function renderVals(s, actions) {
   const selectedSess = sessionsRich[s.selectedSession] || sessionsRich[0];
 
   const hourTicks = [];
-  for (let h = 9; h <= 19; h++) {
+  for (let h = 8; h <= 20; h++) {
     hourTicks.push({ h, leftPct: scaleX(h * 60).toFixed(2) + '%', label: String(h).padStart(2, '0') + ':00' });
   }
-  const dayHourTicks = [9, 11, 13, 15, 17, 19].map((h) => ({
+  const dayHourTicks = [8, 10, 12, 14, 16, 18, 20].map((h) => ({
     h,
     leftPct: scaleX(h * 60).toFixed(2) + '%',
     label: String(h).padStart(2, '0'),
@@ -755,11 +757,11 @@ function renderVals(s, actions) {
     const ints = dayInterruptsFor(d);
     const offFromToday = Math.round((d.getTime() - baseDate.getTime()) / (24 * 3600 * 1000));
     const sessBars = sess.map((b) => ({
-      leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-      widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+      widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
       bg: b.ai ? 'var(--ai)' : 'var(--human)',
     }));
-    const intTicks = ints.map((m) => ({ leftPct: (((m - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%' }));
+    const intTicks = ints.map((m) => ({ leftPct: (((m - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%' }));
     const dayLanesRaw = weekBranches
       .map((br) => {
         const onDay = br.sessions.filter((s2) => s2.day === i);
@@ -769,13 +771,13 @@ function renderVals(s, actions) {
     const dayLanes = dayLanesRaw.map((l) => ({
       name: l.name,
       bars: l.sessions.map((b) => ({
-        leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-        widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+        leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+        widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
         bg: b.ai ? 'var(--ai)' : 'var(--human)',
       })),
     }));
     let dayConcPeak = 0;
-    for (let m = 9 * 60; m < 19 * 60; m += 30) {
+    for (let m = 8 * 60; m < 20 * 60; m += 30) {
       let n = 0;
       dayLanesRaw.forEach((l) => {
         if (l.sessions.some((s2) => s2.s <= m && s2.e > m)) n++;
@@ -829,7 +831,7 @@ function renderVals(s, actions) {
       total = 0,
       samples = 0;
     for (let day = 0; day < 7; day++) {
-      for (let m = 9 * 60; m < 19 * 60; m += 30) {
+      for (let m = 8 * 60; m < 20 * 60; m += 30) {
         let n = 0;
         branches.forEach((br) => {
           if (br.sessions.some((s2) => s2.day === day && s2.s <= m && s2.e > m)) n++;
@@ -845,7 +847,7 @@ function renderVals(s, actions) {
   };
 
   const weekConc = computePeakConcurrent(weekBranches);
-  const weekTotalMins = 7 * 600;
+  const weekTotalMins = 7 * 720;
   const weekBranchesRich = weekBranches.map((br) => {
     const totalMin = br.sessions.reduce((a, s2) => a + (s2.e - s2.s), 0);
     const distinctDays = new Set(br.sessions.map((s2) => s2.day)).size;
@@ -856,7 +858,7 @@ function renderVals(s, actions) {
       durLabel: totalMin >= 60 ? Math.floor(totalMin / 60) + 'h ' + pad2(totalMin % 60) + 'm' : totalMin + 'm',
       distinctDays,
       bars: br.sessions.map((blk) => ({
-        leftPct: (((blk.day * 600 + (blk.s - 9 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
+        leftPct: (((blk.day * 720 + (blk.s - 8 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
         widthPct: (((blk.e - blk.s) / weekTotalMins) * 100).toFixed(3) + '%',
         bg: blk.ai ? 'var(--ai)' : 'var(--human)',
       })),
@@ -878,13 +880,13 @@ function renderVals(s, actions) {
   });
   const weekConcSamples = [];
   for (let day = 0; day < 7; day++) {
-    for (let m = 9 * 60; m < 19 * 60; m += 30) {
+    for (let m = 8 * 60; m < 20 * 60; m += 30) {
       let n = 0;
       weekBranches.forEach((br) => {
         if (br.sessions.some((s2) => s2.day === day && s2.s <= m && s2.e > m)) n++;
       });
       weekConcSamples.push({
-        leftPct: (((day * 600 + (m - 9 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
+        leftPct: (((day * 720 + (m - 8 * 60)) / weekTotalMins) * 100).toFixed(3) + '%',
         widthPct: ((30 / weekTotalMins) * 100).toFixed(3) + '%',
         n,
         heightPct: ((n / Math.max(weekConc.peak, 1)) * 100).toFixed(1) + '%',
@@ -894,8 +896,8 @@ function renderVals(s, actions) {
   }
   const weekBranchCount = weekBranches.length;
 
-  const weekHourTicks = [9, 11, 13, 15, 17, 19].map((h) => ({
-    leftPct: (((h - 9) / 10) * 100).toFixed(2) + '%',
+  const weekHourTicks = [8, 10, 12, 14, 16, 18, 20].map((h) => ({
+    leftPct: (((h - 8) / 12) * 100).toFixed(2) + '%',
     label: pad2(h),
   }));
 
@@ -1176,12 +1178,12 @@ function renderVals(s, actions) {
     dayViewPeak: isToday_ ? 4 : viewedDateStats.peak,
     dayViewPrs: isToday_ ? 1 : viewedDateStats.prs,
     viewedDayBars: daySessionsFor(viewedDate).map((b) => ({
-      leftPct: (((b.s - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
-      widthPct: (((b.e - b.s) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((b.s - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
+      widthPct: (((b.e - b.s) / (12 * 60)) * 100).toFixed(2) + '%',
       bg: b.ai ? 'var(--ai)' : 'var(--human)',
     })),
     viewedIntTicks: dayInterruptsFor(viewedDate).map((m) => ({
-      leftPct: (((m - 9 * 60) / (10 * 60)) * 100).toFixed(2) + '%',
+      leftPct: (((m - 8 * 60) / (12 * 60)) * 100).toFixed(2) + '%',
     })),
     weekHourTicks,
     shiftDayPrev: shiftDay(-1),
@@ -1202,11 +1204,30 @@ function renderVals(s, actions) {
     shiftWeekNext: shiftWeek(1),
     canShiftWeekNext: s.weekOffset < 0,
     weekNextDisabled: !(s.weekOffset < 0),
+    // freee人事労務の期間選択に倣った週ピッカー (SelectBox 用): W14..W26 を直接選べる。
+    weekPickerValue: String(s.weekOffset),
+    weekPickerOptions: Array.from({ length: 13 }, (_, i) => {
+      const off = i - 12;
+      return { value: String(off), name: 'W' + (26 + off) };
+    }),
+    onWeekPick: (e) => setState({ weekOffset: Number(e.target.value) }),
+    shiftWeekToThis: () => setState({ weekOffset: 0 }),
+    weekIsThis: s.weekOffset === 0,
     monthCells, monthTotals, monthAvgAi, monthLabel, monthLabelEn,
     shiftMonthPrev: shiftMonth(-1),
     shiftMonthNext: shiftMonth(1),
     canShiftMonthNext: s.monthOffset < 0,
     monthNextDisabled: !(s.monthOffset < 0),
+    // freee人事労務の期間選択に倣った月ピッカー (SelectBox 用): 直近 6 か月を直接選べる。
+    monthPickerValue: String(s.monthOffset),
+    monthPickerOptions: Array.from({ length: 6 }, (_, i) => {
+      const off = i - 5;
+      const d = new Date(baseDate.getFullYear(), baseDate.getMonth() + off, 1);
+      return { value: String(off), name: d.getFullYear() + '年' + (d.getMonth() + 1) + '月' };
+    }),
+    onMonthPick: (e) => setState({ monthOffset: Number(e.target.value) }),
+    shiftMonthToThis: () => setState({ monthOffset: 0 }),
+    monthIsThis: s.monthOffset === 0,
     monthCols: ['月', '火', '水', '木', '金', '土', '日'],
     typeCells,
     selectedType,

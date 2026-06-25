@@ -1,4 +1,4 @@
-import { TabBar } from '@freee_jp/vibes';
+import { TabBar, StatusIcon } from '@freee_jp/vibes';
 import { MdAnalytics, MdMenuBook, MdToday, MdListAlt, MdDonutSmall, MdInsights } from 'react-icons/md';
 import { useActivityLog } from './logic/useActivityLog.js';
 import IndexScreen from './screens/IndexScreen.jsx';
@@ -21,23 +21,28 @@ function App() {
   return (
     <div data-screen-label="稼働ログ / Activity Log" style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh', fontFamily: 'var(--font-family-body)' }}>
       {/* MASTHEAD */}
+      {/* vibes-audit: アプリ固有のプロダクトヘッダー。vibes はグローバルナビ部品
+         (GlobalNaviButton 等) は持つが、ロゴ＋和欧併記タイトル＋日付＋ステータスを
+         この比率で並べる Header コンポーネントは無い。タイトルの 18px/12px や字間も
+         Text の固定サイズ外なので header 自体は素の markup で残す。 */}
       <header style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--rule)', padding: '18px 32px', display: 'flex', alignItems: 'center', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <MdAnalytics size={24} color="var(--accent)" />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            {/* vibes-audit: 18px は vibes Text(12/14/16/24px)に無いサイズ＋字間指定不可のため素テキスト。 */}
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 18, fontWeight: 700, letterSpacing: '.02em', color: 'var(--ink)' }}>稼働ログ</div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)', letterSpacing: '.04em' }}>Activity Log</div>
           </div>
         </div>
+        {/* vibes-audit: 縦罫線。vibes に Divider/区切り線コンポーネントが存在しないため 1px の div で描画。 */}
         <div style={{ height: 20, width: 1, background: 'var(--rule)' }}></div>
         <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-2)', letterSpacing: '.02em' }}>
           2026 Q2 · W26 · 6/19 (Fri)
         </div>
+        {/* 「記録中」の状態表示は vibes StatusIcon に移行 (自前の緑ドット+ラベルを置換)。
+           type="progress" は記録継続中を表す琥珀のステータスピル。design は多少変わる。 */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)' }}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--vb-gr-05)' }}></span>
-            記録中
-          </span>
+          <StatusIcon type="progress">記録中</StatusIcon>
         </div>
       </header>
 

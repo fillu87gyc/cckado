@@ -1,8 +1,12 @@
+import { SectionTitle, SubSectionTitle } from '@freee_jp/vibes';
+
 export default function QuarterScreen({ vm }) {
   return (
+    // vibes-audit: 画面枠 (padding/maxWidth 1280px) は vibes Container の離散幅に合わず素 article。
     <article data-screen-label="四半期推移 / Quarter" style={{ padding: '48px 48px 96px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 28, borderBottom: '1px solid var(--color-border)', paddingBottom: 14 }}>
-        <h2 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 22, letterSpacing: '.06em', margin: 0 }}>四半期推移</h2>
+        {/* 見出しを vibes SectionTitle (<h2>) へ移行。 */}
+        <SectionTitle>四半期推移</SectionTitle>
         <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, color: 'var(--ink-3)', letterSpacing: '.04em' }}>Quarterly Report</span>
         <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.08em' }}>2026 Q2 · W14 → W26</span>
       </div>
@@ -11,7 +15,8 @@ export default function QuarterScreen({ vm }) {
       <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid var(--rule)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
           <div>
-            <h3 style={{ fontFamily: 'var(--font-family-body)', fontSize: 18, fontWeight: 600, letterSpacing: '.06em', margin: 0 }}>週次の推移 · 時間 と AI 比率</h3>
+            {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+            <SubSectionTitle>週次の推移 · 時間 と AI 比率</SubSectionTitle>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4, letterSpacing: '.06em' }}>⇽ 横軸をドラッグして週を選ぶ ⇾  下のヒートマップ・型遷移・ツール構成すべて連動</div>
           </div>
           <div style={{ display: 'flex', gap: 24, fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)' }}>
@@ -20,6 +25,8 @@ export default function QuarterScreen({ vm }) {
             <span><span style={{ display: 'inline-block', width: 6, height: 6, background: 'var(--accent)', borderRadius: '50%', verticalAlign: 'middle', marginRight: 6 }}></span>マージ (PR)</span>
           </div>
         </div>
+        {/* vibes-audit: ドラッグでスクラブする週次トレンドチャート(面/折れ線/PRドット/注記/スクラバ)。
+           ポインタ操作で他図と連動する複合 SVG 可視化で、vibes にチャート部品は無いため SVG 直書き。 */}
         <div onPointerDown={vm.onScrubDown} style={{ cursor: 'ew-resize', touchAction: 'none', userSelect: 'none' }}>
           <svg viewBox={`0 0 ${vm.cW} ${vm.cH}`} style={{ width: '100%', height: 'auto', overflow: 'visible', fontFamily: 'var(--font-family-body)', display: 'block' }}>
             <line x1="50" y1={vm.chartBaseline} x2="970" y2={vm.chartBaseline} stroke="var(--ink)" strokeWidth="1" />
@@ -60,10 +67,14 @@ export default function QuarterScreen({ vm }) {
       </div>
 
       {/* Scrubbed week card */}
+      {/* vibes-audit: 影/角丸はカード相当だが、CardBase の固定 24px padding では
+         左右 2 ペイン＋内部罫線＋54px の大見出し数値レイアウトを再現できないため素 grid。 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.9fr', gap: 0, background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-card)', overflow: 'hidden', marginBottom: 48 }}>
         <div style={{ padding: '24px 28px', borderRight: '1px solid var(--rule)' }}>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em' }}>SELECTED WEEK</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 10 }}>
+            {/* vibes-audit: これは見出しではなく 54px の大型ディスプレイ数値。vibes の見出し部品は
+               サイズ固定(~14px)で、この数値表示の役割・大きさを担えないため素の要素で残す。 */}
             <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 700, fontSize: 54, letterSpacing: '.02em', margin: 0, lineHeight: 1 }}>{vm.scrubWeekLabel}</h3>
             <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 13, color: 'var(--ink-3)' }}>週開始 {vm.scrubWeekDate}</span>
           </div>
@@ -97,12 +108,15 @@ export default function QuarterScreen({ vm }) {
       </div>
 
       {/* 2 Heatmaps */}
+      {/* vibes-audit: 週×曜日のヒートマップ 2 枚。セル背景の連続濃淡・outline・数値オーバーレイを
+         グリッドで敷き詰める可視化で、vibes にヒートマップ部品が無く全面的に素の grid。 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 48, paddingBottom: 32, borderBottom: '1px solid var(--rule)' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--sea)', letterSpacing: '.06em' }}>FIG. I</div>
-              <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: '4px 0 0' }}>並列セッションの濃淡 / 週 × 曜日</h3>
+              {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+              <SubSectionTitle>並列セッションの濃淡 / 週 × 曜日</SubSectionTitle>
             </div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>peak {vm.maxCon} 件</div>
           </div>
@@ -125,7 +139,8 @@ export default function QuarterScreen({ vm }) {
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em' }}>FIG. II</div>
-              <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: '4px 0 0' }}>中断 (interrupt) の密度 / 週 × 曜日</h3>
+              {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+              <SubSectionTitle>中断 (interrupt) の密度 / 週 × 曜日</SubSectionTitle>
             </div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>peak {vm.maxInt} 件/日</div>
           </div>
@@ -151,10 +166,13 @@ export default function QuarterScreen({ vm }) {
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
           <div>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em' }}>FIG. III</div>
-            <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: '4px 0 0' }}>型の遷移 / 13週分の型推移</h3>
+            {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+            <SubSectionTitle>型の遷移 / 13週分の型推移</SubSectionTitle>
           </div>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>13 weeks</div>
         </div>
+        {/* vibes-audit: 13 週分の型遷移リボン。各週セルに 3×3 のミニマトリクスを埋め込む独自可視化で、
+           vibes に該当部品が無いため素の grid。 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(13, 1fr)', gap: 6 }}>
           {vm.trajRibbonRich.map((t, i) => (
             <div key={i} style={{ padding: '10px 8px 12px', background: t.bg, border: t.border, textAlign: 'center' }}>
@@ -175,8 +193,11 @@ export default function QuarterScreen({ vm }) {
         <div>
           <div style={{ marginBottom: 18 }}>
             <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em' }}>FIG. IV</div>
-            <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: '4px 0 0' }}>ツール構成 / どのツールで何を進めたか</h3>
+            {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+            <SubSectionTitle>ツール構成 / どのツールで何を進めたか</SubSectionTitle>
           </div>
+          {/* vibes-audit: 週ごとの積み上げ棒(ツール構成)。セグメントを絶対配置 %/px で積む可視化で、
+             vibes に積み上げ棒グラフ部品が無いため素の div で描画。 */}
           <div style={{ position: 'relative', height: 220, borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'flex-end', gap: 6 }}>
             {vm.toolBars.map((b, i) => (
               <div key={i} style={{ flex: 1, position: 'relative', height: '100%' }}>
@@ -208,8 +229,11 @@ export default function QuarterScreen({ vm }) {
       <div style={{ marginBottom: 48 }}>
         <div style={{ marginBottom: 18 }}>
           <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em' }}>APPENDIX</div>
-          <h3 style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 18, letterSpacing: '.06em', margin: '4px 0 0' }}>付録 · Q2 を読み解く六つの数字</h3>
+          {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
+          <SubSectionTitle>付録 · Q2 を読み解く六つの数字</SubSectionTitle>
         </div>
+        {/* vibes-audit: 6 連の数値ストリップ。32px の数値・上下 1.5px 罫線・セル区切りは
+           vibes Text(固定サイズ)や CardBase(固定 padding)では再現できないため素 grid。 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 0, borderTop: '1.5px solid var(--color-border)', borderBottom: '1.5px solid var(--color-border)' }}>
           {vm.quarterStats.map((q) => (
             <div key={q.label} style={{ padding: '20px 16px', borderRight: '1px solid var(--rule)' }}>

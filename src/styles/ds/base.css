@@ -1,5 +1,11 @@
 /* freee Vibes — Base reset & document defaults */
 
+/* vibes-audit (なぜ vibes に置き換え不可能か):
+   vibes は自身のコンポーネントにスコープした reset しか持たず、box-sizing や
+   body の既定スタイルといった document レベルの土台は提供しない。
+   `.material-icons*` クラスは IndexScreen を react-icons へ移行したため現状未使用。
+   raw Material アイコンを今後使わないなら削除してよい (font は fonts.css 参照)。 */
+
 *,
 *::before,
 *::after {

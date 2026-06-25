@@ -6,6 +6,8 @@
 @import './styles/ds/motion.css';
 @import './styles/ds/base.css';
 
+/* vibes-audit: document レベルの reset / body 既定スタイルは vibes が提供しない
+   (vibes は自前コンポーネントにスコープした CSS のみ出荷)。よってここは vibes 化不可。 */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -17,6 +19,9 @@ body {
 
 /* Internal CSS variables remapped to Vibes tokens.
    Keeps the prototype's markup/logic untouched while inheriting the freee palette. */
+/* vibes-audit: この remap 層も vibes 化不可。vibes はトークンを CSS 変数として公開せず
+   (colors.css の audit 参照)、チャート/ヒートマップ/タイムライン等の自前描画は
+   vibes コンポーネントに存在しないため、これらの色エイリアスを直接参照するしかない。 */
 :root {
   --bg: var(--color-bg-page);          /* P1 — pale blue page */
   --bg-panel: var(--color-bg-column);  /* S1 — sand grey column */
@@ -33,12 +38,20 @@ body {
   --alert-soft: var(--vb-re-02);
   --sea: var(--vb-bg-07);              /* teal — secondary chart hue */
   --notice: var(--vb-ye-07);
-  --ai: var(--accent);                 /* AI work — freee blue */
-  --human: var(--sea);                 /* human / manual — teal */
-  --interrupt: var(--vb-or-05);        /* interrupt — orange */
+  /* 稼働タイムラインの配色は freee人事労務・勤怠の勤務バーに倣う:
+     「労働 = teal 単色系」とし、AI/手動は同一 teal の濃淡で区別する
+     (中断は freee の注意色=橙のまま)。これらは LogScreen のみが参照するトークンなので、
+     --accent/--sea を直接使う Today/Quarter/Compass の配色には影響しない。 */
+  --ai: var(--vb-bg-07);               /* AI 稼働（主たる労働）— freee teal */
+  --human: var(--vb-bg-04);            /* 手動（協働）— 同 teal の淡色 */
+  --interrupt: var(--vb-or-05);        /* 中断 — freee 注意色の橙 */
 }
 
 /* freee-style focus ring */
+/* vibes-audit: vibes Button は自前で focus-ring を持つが、TOC・Compass セル・
+   カレンダー日付などは「中身が独自レイアウトの素の <button>」で vibes Button 化すると
+   その構造を失う。そのためグローバル focus 規則で freee の focus-ring を共有しており、
+   vibes では代替できない。 */
 button:focus-visible {
   outline: none;
   box-shadow: var(--shadow-focus-ring);
