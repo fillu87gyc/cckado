@@ -1,5 +1,5 @@
-import { ToggleButton, IconOnlyButton, Button, FullScreenModal, DatePicker, SectionTitle, SubSectionTitle } from '@freee_jp/vibes';
-import { MdChevronLeft, MdChevronRight, MdToday, MdCalendarToday } from 'react-icons/md';
+import { ToggleButton, IconOnlyButton, Button, FullScreenModal, DateInput, SectionTitle, SubSectionTitle } from '@freee_jp/vibes';
+import { MdChevronLeft, MdChevronRight, MdToday } from 'react-icons/md';
 
 export default function LogScreen({ vm }) {
   return (
@@ -34,23 +34,15 @@ export default function LogScreen({ vm }) {
         </div>
 
         {vm.isLogDay && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
+          // freee人事労務の日付選択に倣い、自前ポップアップ+DatePicker を vibes DateInput
+          // (カレンダー内蔵の日付フィールド) に置換。フォーカス/カレンダーアイコンでカレンダーが開き、
+          // テキスト編集も可能。表示は「YYYY年M月D日」、onChange は 'YYYY-MM-DD' を返すため jumpToDate と整合。
+          // 前後送り(chevron)と「本日へ」は freee の日付ナビ同様に併置する。
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <IconOnlyButton IconComponent={MdChevronLeft} label="前日へ" appearance="secondary" small onClick={vm.shiftDayPrev} />
-            <div style={{ textAlign: 'center', minWidth: 200 }}>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{vm.dayLabel}</div>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, fontWeight: 600, letterSpacing: '.02em', marginTop: 2 }}>{vm.dayLabelShort}</div>
-            </div>
+            <DateInput value={vm.viewedDateISO} maxDate={vm.maxDateISO} width="medium" onChange={vm.onDatePickerSelect} aria-label="日付を選択" />
             <IconOnlyButton IconComponent={MdChevronRight} label="翌日へ" appearance="secondary" small disabled={vm.dayNextDisabled} onClick={vm.shiftDayNext} />
             <Button appearance="secondary" small IconComponent={MdToday} iconPosition="left" onClick={vm.shiftDayToToday}>本日へ</Button>
-            <IconOnlyButton IconComponent={MdCalendarToday} label="日付を選択" appearance="secondary" small onClick={vm.toggleDatePicker} />
-            {vm.datePickerOpen && (
-              // vibes-audit: DatePicker 本体は vibes だが、それを開閉位置に重ねる浮きレイヤは
-              // アンカー相対の絶対配置で、vibes の FloatingBase/PopupBase は配置計算を内包しない
-              // ため自前の position:absolute ラッパで包む。
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, zIndex: 10, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', borderRadius: 'var(--radius-card)' }}>
-                <DatePicker date={vm.viewedDateISO} maxDate={vm.maxDateISO} onDateClick={vm.onDatePickerSelect} />
-              </div>
-            )}
           </div>
         )}
         {vm.isLogWeek && (
