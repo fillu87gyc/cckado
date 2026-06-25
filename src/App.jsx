@@ -37,7 +37,7 @@ function App() {
         {/* vibes-audit: 縦罫線。vibes に Divider/区切り線コンポーネントが存在しないため 1px の div で描画。 */}
         <div style={{ height: 20, width: 1, background: 'var(--rule)' }}></div>
         <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-2)', letterSpacing: '.02em' }}>
-          2026 Q2 · W26 · 6/19 (Fri)
+          {vm.headerLine}
         </div>
         {/* 「記録中」の状態表示は vibes StatusIcon に移行 (自前の緑ドット+ラベルを置換)。
            type="progress" は記録継続中を表す琥珀のステータスピル。design は多少変わる。 */}
@@ -63,6 +63,20 @@ function App() {
           };
         })}
       />
+
+      {vm.isLoading && (
+        <div style={{ padding: '80px 32px', textAlign: 'center', color: 'var(--ink-3)', fontFamily: 'var(--font-family-body)' }}>
+          実データを読み込み中…
+        </div>
+      )}
+      {vm.loadError && (
+        <div style={{ padding: '80px 32px', textAlign: 'center', color: 'var(--ink-2)', fontFamily: 'var(--font-family-body)' }}>
+          <div style={{ fontSize: 15, marginBottom: 8 }}>データサーバに接続できません</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
+            別ターミナルで <code>npm run serve</code> を起動してください (詳細: {vm.loadError})
+          </div>
+        </div>
+      )}
 
       {vm.isIndex && <IndexScreen vm={vm} />}
       {vm.isToday && <TodayScreen vm={vm} />}
