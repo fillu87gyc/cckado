@@ -1153,6 +1153,10 @@ function renderVals(s, actions) {
     selectedSess,
     hourTicks,
     dayHourTicks,
+    // freee人事労務・勤怠の「所定/残業」表現に倣う: 定時=18:00。これ以降を残業帯として塗る。
+    // 勤務枠(09:00–19:00)上での 18:00 の位置 (%)。各タイムラインで残業帯/定時ラインの基準にする。
+    overtimeStartPct: scaleX(18 * 60).toFixed(2) + '%',
+    teiziLabel: '18:00',
     branchRows,
     totalSessionsLabel,
     totalSessions,
@@ -1204,11 +1208,30 @@ function renderVals(s, actions) {
     shiftWeekNext: shiftWeek(1),
     canShiftWeekNext: s.weekOffset < 0,
     weekNextDisabled: !(s.weekOffset < 0),
+    // freee人事労務の期間選択に倣った週ピッカー (SelectBox 用): W14..W26 を直接選べる。
+    weekPickerValue: String(s.weekOffset),
+    weekPickerOptions: Array.from({ length: 13 }, (_, i) => {
+      const off = i - 12;
+      return { value: String(off), name: 'W' + (26 + off) };
+    }),
+    onWeekPick: (e) => setState({ weekOffset: Number(e.target.value) }),
+    shiftWeekToThis: () => setState({ weekOffset: 0 }),
+    weekIsThis: s.weekOffset === 0,
     monthCells, monthTotals, monthAvgAi, monthLabel, monthLabelEn,
     shiftMonthPrev: shiftMonth(-1),
     shiftMonthNext: shiftMonth(1),
     canShiftMonthNext: s.monthOffset < 0,
     monthNextDisabled: !(s.monthOffset < 0),
+    // freee人事労務の期間選択に倣った月ピッカー (SelectBox 用): 直近 6 か月を直接選べる。
+    monthPickerValue: String(s.monthOffset),
+    monthPickerOptions: Array.from({ length: 6 }, (_, i) => {
+      const off = i - 5;
+      const d = new Date(baseDate.getFullYear(), baseDate.getMonth() + off, 1);
+      return { value: String(off), name: d.getFullYear() + '年' + (d.getMonth() + 1) + '月' };
+    }),
+    onMonthPick: (e) => setState({ monthOffset: Number(e.target.value) }),
+    shiftMonthToThis: () => setState({ monthOffset: 0 }),
+    monthIsThis: s.monthOffset === 0,
     monthCols: ['月', '火', '水', '木', '金', '土', '日'],
     typeCells,
     selectedType,
