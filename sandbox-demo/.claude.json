@@ -1,0 +1,14 @@
+{
+  "userID": "demo-user-0001",
+  "numStartups": 128,
+  "projects": {
+    "/home/dev/acme-web": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep", "Task"],
+      "mcpServers": {
+        "github": { "command": "github-mcp" },
+        "playwright": { "command": "playwright-mcp" }
+      },
+      "history": [{ "display": "サブエージェントのフロー設計を試す" }]
+    }
+  }
+}

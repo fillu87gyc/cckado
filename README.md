@@ -16,6 +16,18 @@ npm run dev:all   # Hono データサーバ (127.0.0.1:8787) + Vite を同時起
 
 データは外部送信せず、すべてローカルで処理される。
 
+### 表示確認用のサンプルデータ (sandbox-demo/)
+
+`sandbox/` はパーサーの単体テストが固定の 5 セッションを前提にしているため変更できない。
+画面の見た目を確認したい場合は、平日 5 日分・8 ブランチ・30 セッション程度に増量した
+`sandbox-demo/` を使う。
+
+```sh
+npm run dev:demo   # sandbox-demo/ のデータでサーバ + フロントを起動
+```
+
+データは `sandbox-demo/generate.mjs` で決定的に生成している (再生成: `npm run demo:gen`)。
+
 ---
 
 This project was bootstrapped from the React + Vite template (HMR + Oxlint).

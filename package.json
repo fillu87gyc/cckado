@@ -8,6 +8,9 @@
     "serve": "node server/index.mjs",
     "test": "node --test \"server/ingest/**/*.test.mjs\"",
     "dev:all": "concurrently -k -n server,web \"npm:serve\" \"npm:dev\"",
+    "demo:gen": "node sandbox-demo/generate.mjs",
+    "serve:demo": "CLAUDE_HOME=\"$(pwd)/sandbox-demo/.claude\" CLAUDE_CONFIG=\"$(pwd)/sandbox-demo/.claude.json\" node server/index.mjs",
+    "dev:demo": "concurrently -k -n server,web \"npm:serve:demo\" \"npm:dev\"",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
