@@ -345,12 +345,14 @@ function renderVals(s, actions) {
     },
   ];
 
+  // 稼働(=労働)系のツールは freee勤怠の「労働=単色 teal」に倣い、すべて teal の濃淡で表現する。
+  // task(並列実装) は最も濃い teal、read→edit→bash→grep と淡くなるランプ。
   const toolColor = (k) =>
     ({
+      task: 'var(--vb-bg-10)',
       read: 'var(--ai)',
       edit: 'color-mix(in oklab, var(--ai) 78%, var(--bg))',
       bash: 'color-mix(in oklab, var(--ai) 56%, var(--bg))',
-      task: 'var(--accent)',
       grep: 'color-mix(in oklab, var(--ai) 40%, var(--bg))',
     }[k] || 'var(--ink-3)');
 

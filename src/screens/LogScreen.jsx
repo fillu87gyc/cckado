@@ -127,7 +127,7 @@ function DayView({ vm }) {
                 <div key={i} style={{ position: 'absolute', left: h.leftPct, top: 0, bottom: 16, width: 1, background: 'var(--rule)', opacity: .6 }}></div>
               ))}
               {vm.viewedDayBars.map((b, i) => (
-                <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 22, background: b.bg, opacity: .9 }}></div>
+                <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 22, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
               ))}
               {vm.viewedIntTicks.map((it, i) => (
                 <div key={i} style={{ position: 'absolute', left: it.leftPct, top: 4, height: 30, width: 2, background: 'var(--interrupt)', transform: 'translateX(-50%)' }}></div>
@@ -190,7 +190,7 @@ function DayView({ vm }) {
                     <div style={{ position: 'absolute', left: `calc(${r.leftPct} - 8px)`, width: `calc(${r.widthPct} + 16px)`, top: 8, bottom: 18, border: '1px solid var(--accent)', borderRadius: 14 }}></div>
                   )}
                   {r.dayBars.map((b, i) => (
-                    <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 14, background: 'var(--ai)', opacity: .85 }}></div>
+                    <div key={i} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 14, height: 14, background: 'var(--ai)', opacity: .85, borderRadius: 3 }}></div>
                   ))}
                   {r.interruptTicks.map((it, i) => (
                     <div key={i} style={{ position: 'absolute', left: it.leftPct, top: 2, height: 14, width: 2, background: 'var(--interrupt)', transform: 'translateX(-50%)' }}></div>
@@ -248,7 +248,8 @@ function BranchActivityModal({ row }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 110px', gap: 14, alignItems: 'center' }}>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink)', letterSpacing: '.04em', textAlign: 'right' }}>メインスレッド</div>
-              <div style={{ position: 'relative', height: 30, border: '1px solid var(--rule)', background: 'var(--bg)', overflow: 'hidden' }}>
+              {/* freee勤怠の勤務バーに倣い、バー全体を角丸に (overflow:hidden で内部フェーズの端も丸く clip)。 */}
+              <div style={{ position: 'relative', height: 30, border: '1px solid var(--rule)', background: 'var(--bg)', overflow: 'hidden', borderRadius: 3 }}>
                 {r.phasesRich.map((p, i) => (
                   <div key={i} title={p.label} style={{ position: 'absolute', top: 0, bottom: 0, left: p.leftPct, width: p.widthPct, background: p.bg }}></div>
                 ))}
@@ -268,7 +269,7 @@ function BranchActivityModal({ row }) {
                 <div style={{ position: 'relative', height: 20 }}>
                   <div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}></div>
                   {sa.tasksLocal.map((t, ti) => (
-                    <div key={ti} style={{ position: 'absolute', top: 2, bottom: 2, left: t.leftPct, width: t.widthPct, background: t.bg }}></div>
+                    <div key={ti} style={{ position: 'absolute', top: 2, bottom: 2, left: t.leftPct, width: t.widthPct, background: t.bg, borderRadius: 3 }}></div>
                   ))}
                 </div>
                 <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.04em' }}>
@@ -420,7 +421,7 @@ function WeekView({ vm }) {
                   <div key={ci} style={{ position: 'absolute', left: c.leftPct, width: c.widthPct, top: 0, bottom: 0, background: c.cellBg, borderRight: '1px solid var(--rule)' }}></div>
                 ))}
                 {br.bars.map((b, bi) => (
-                  <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 6, height: 16, background: b.bg, opacity: .9 }}></div>
+                  <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 6, height: 16, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
                 ))}
               </div>
               <div style={{ padding: '8px 12px', textAlign: 'right', fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-2)', letterSpacing: '.04em', borderLeft: '1px solid var(--rule)' }}>
@@ -469,7 +470,7 @@ function WeekView({ vm }) {
                   <div key={li} style={{ position: 'relative', height: 14, borderBottom: '1px solid color-mix(in oklab, var(--rule) 50%, transparent)' }}>
                     <span style={{ position: 'absolute', left: 6, top: 0, bottom: 0, display: 'flex', alignItems: 'center', fontFamily: 'var(--font-family-body)', fontSize: 8, color: 'var(--ink-3)', letterSpacing: '.02em', zIndex: 3, pointerEvents: 'none', textShadow: '0 0 3px var(--bg-sink), 0 0 3px var(--bg-sink)' }}>{lane.name}</span>
                     {lane.bars.map((b, bi) => (
-                      <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 2, height: 10, background: b.bg, opacity: .9, borderRadius: 1 }}></div>
+                      <div key={bi} style={{ position: 'absolute', left: b.leftPct, width: b.widthPct, top: 2, height: 10, background: b.bg, opacity: .9, borderRadius: 3 }}></div>
                     ))}
                   </div>
                 ))}
@@ -557,8 +558,8 @@ function MonthView({ vm }) {
                 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '.04em' }}>{c.hoursLabel}<span style={{ opacity: .6 }}>h</span></span>
               </div>
               <div style={{ flex: 1, position: 'relative', height: 34, background: 'var(--bg-sink)' }}>
-                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '60%', height: c.barHeight, background: 'var(--ai)', opacity: .7 }}></div>
-                <div style={{ position: 'absolute', left: '60%', bottom: 0, width: '40%', height: c.aiBarWidth, background: 'var(--accent)', opacity: .5 }}></div>
+                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '60%', height: c.barHeight, background: 'var(--ai)', opacity: .7, borderRadius: '2px 2px 0 0' }}></div>
+                <div style={{ position: 'absolute', left: '60%', bottom: 0, width: '40%', height: c.aiBarWidth, background: 'var(--accent)', opacity: .5, borderRadius: '2px 2px 0 0' }}></div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-family-body)', fontSize: 9, color: 'var(--ink-3)', letterSpacing: '.04em' }}>
                 <span style={{ display: 'flex', gap: 3 }}>

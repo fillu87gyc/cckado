@@ -38,9 +38,13 @@ body {
   --alert-soft: var(--vb-re-02);
   --sea: var(--vb-bg-07);              /* teal — secondary chart hue */
   --notice: var(--vb-ye-07);
-  --ai: var(--accent);                 /* AI work — freee blue */
-  --human: var(--sea);                 /* human / manual — teal */
-  --interrupt: var(--vb-or-05);        /* interrupt — orange */
+  /* 稼働タイムラインの配色は freee人事労務・勤怠の勤務バーに倣う:
+     「労働 = teal 単色系」とし、AI/手動は同一 teal の濃淡で区別する
+     (中断は freee の注意色=橙のまま)。これらは LogScreen のみが参照するトークンなので、
+     --accent/--sea を直接使う Today/Quarter/Compass の配色には影響しない。 */
+  --ai: var(--vb-bg-07);               /* AI 稼働（主たる労働）— freee teal */
+  --human: var(--vb-bg-04);            /* 手動（協働）— 同 teal の淡色 */
+  --interrupt: var(--vb-or-05);        /* 中断 — freee 注意色の橙 */
 }
 
 /* freee-style focus ring */
