@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "serve": "node server/index.mjs",
+    "test": "node --test \"server/ingest/**/*.test.mjs\"",
     "dev:all": "concurrently -k -n server,web \"npm:serve\" \"npm:dev\"",
     "build": "vite build",
     "lint": "oxlint",
