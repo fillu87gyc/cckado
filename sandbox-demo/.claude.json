@@ -13,6 +13,10 @@
     "/home/dev/billing-api": {
       "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep"],
       "history": [{ "display": "課金プランのカラム追加マイグレーション" }]
+    },
+    "/home/user/cckado": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm *)", "Grep"],
+      "history": [{ "display": "モックデータのjsonを何とか増やして再現して欲しい" }]
     }
   }
 }

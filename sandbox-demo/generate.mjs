@@ -17,6 +17,10 @@ const ROOT = path.dirname(new URL(import.meta.url).pathname);
 const PROJECTS = {
   acme: { dir: '-home-dev-acme-web', cwd: '/home/dev/acme-web' },
   billing: { dir: '-home-dev-billing-api', cwd: '/home/dev/billing-api' },
+  // The cckado repo itself, used once below for a "today" session that
+  // mirrors this very dashboard-generator work (summarized, no transcript
+  // dump / no uploaded-image data).
+  cckado: { dir: '-home-user-cckado', cwd: '/home/user/cckado' },
 };
 for (const p of Object.values(PROJECTS)) fs.mkdirSync(path.join(ROOT, '.claude', 'projects', p.dir), { recursive: true });
 
@@ -472,6 +476,81 @@ for (let dayIdx = 0; dayIdx < WEEK.length; dayIdx++) {
     buildSession(day, branches[i], startMin);
   }
 }
+
+// One real "today" session: a summarized version of the actual working
+// session that built this generator (this file). Real branch + real
+// timestamps, but condensed to the gist of what happened rather than a
+// verbatim transcript dump (the real session log carries the uploaded
+// screenshot as inline base64 and is 400+ records long - neither belongs in
+// a committed mock dataset).
+function buildRealSession() {
+  const proj = PROJECTS.cckado;
+  const common = { sessionId: 'demo0031-0000-4eee-9000-000000000031', cwd: proj.cwd, gitBranch: 'claude/expand-mock-data-json-f3uwjz' };
+  const lines = [];
+  let uuidN = 0;
+  const nextUuid = (p) => `${p}-real31-${++uuidN}`;
+  // The real session actually started 2026-06-25T23:42 UTC and ran past
+  // midnight, but that split confuses the daily aggregator's day-bucketing
+  // (a session can't span two calendar days cleanly there) - so this
+  // condensed replay is shifted to sit entirely within "today".
+  const startMs = new Date('2026-06-26T09:10:00Z').getTime();
+  let elapsedMin = 0;
+  const ts = () => new Date(startMs + elapsedMin * 60000).toISOString();
+
+  const steps = [
+    u('モックデータのjsonを何とか増やして再現して欲しい。今はデータが少なすぎ'),
+    t('Read', { file_path: 'server/ingest/aggregate.mjs' }, '週次集計（AI比率・並列ピーク・中断数）の算出ロジックを確認。'),
+    t('Read', { file_path: 'sandbox/.claude.json' }, 'sandbox/ は単体テストで件数を固定されたフィクスチャと判明。'),
+    t('Write', { file_path: 'sandbox-demo/generate.mjs', content: '(seeded generator v1: BRANCHES + 汎用TOOL_INPUT)' }, 'Created sandbox-demo/generate.mjs'),
+    t('Bash', { command: 'npm run demo:gen && npm test' }, 'Generated 30 sessions / ✓ 44 passed'),
+    x('コピーではダメ。ちゃんとやる'),
+    t('Edit', { file_path: 'sandbox-demo/generate.mjs', old_string: 'const BRANCHES = { ... plan: [...] }', new_string: 'const CHAPTERS = { ... 各ブランチの複数日ストーリー }' },
+      'Updated sandbox-demo/generate.mjs（汎用plan/TOOL_INPUTを廃止し、ブランチごとの実話風チャプターに置き換え）'),
+    t('Bash', { command: 'node sandbox-demo/generate.mjs && npm test' }, 'Generated 30 sessions, interrupts: 7 / ✓ 44 passed'),
+    u('なんでこんなに早い時間に偏ってるの？もっと散らして'),
+    t('Edit', { file_path: 'sandbox-demo/generate.mjs', old_string: 'startMin += randInt(15, 55);', new_string: 'wave-based scheduling across 09:00-19:30' },
+      'Updated sandbox-demo/generate.mjs（開始時刻を午前に固めず、波状に終日へ分散）'),
+    t('Bash', { command: 'node sandbox-demo/generate.mjs && npm test' }, 'Generated 30 sessions / ✓ 44 passed'),
+    t('Bash', { command: 'git push origin claude/expand-mock-data-json-f3uwjz' }, 'pushed'),
+  ];
+
+  const userUuid = nextUuid('u');
+  lines.push({ type: 'user', ...common, slug: 'expand-mock-data-json', timestamp: ts(), uuid: userUuid, parentUuid: null,
+    message: { role: 'user', content: steps[0].text } });
+  let parentUuid = userUuid;
+  elapsedMin += 1;
+
+  for (const step of steps.slice(1)) {
+    if (step.k === 'tool') {
+      const aUuid = nextUuid('a');
+      lines.push({ type: 'assistant', ...common, timestamp: ts(), uuid: aUuid, parentUuid,
+        message: { role: 'assistant', content: [{ type: 'tool_use', id: `tu-${aUuid}`, name: step.name, input: step.input }] } });
+      parentUuid = aUuid;
+      elapsedMin += randInt(3, 9);
+      const rUuid = nextUuid('u');
+      lines.push({ type: 'user', ...common, timestamp: ts(), uuid: rUuid, parentUuid,
+        message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: `tu-${aUuid}`, content: step.result }] } });
+      parentUuid = rUuid;
+      elapsedMin += randInt(1, 4);
+    } else if (step.k === 'user') {
+      const uUuid = nextUuid('u');
+      lines.push({ type: 'user', ...common, timestamp: ts(), uuid: uUuid, parentUuid,
+        message: { role: 'user', content: step.text } });
+      parentUuid = uUuid;
+      elapsedMin += 1;
+    } else if (step.k === 'interrupt') {
+      const qUuid = nextUuid('q');
+      lines.push({ type: 'queue-operation', ...common, operation: 'remove', timestamp: ts(), uuid: qUuid, parentUuid, content: step.text });
+      parentUuid = qUuid;
+      totalInterrupts++;
+      elapsedMin += 1;
+    }
+  }
+
+  fs.writeFileSync(path.join(ROOT, '.claude', 'projects', proj.dir, `${common.sessionId}.jsonl`), lines.map((l) => JSON.stringify(l)).join('\n') + '\n');
+  sessionSeq++;
+}
+buildRealSession();
 
 console.log(`Generated ${sessionSeq - 1} sessions`);
 console.log(`Total interrupts emitted: ${totalInterrupts}`);
