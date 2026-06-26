@@ -447,14 +447,28 @@ function buildSession(day, branch, startMin) {
   return cursor;
 }
 
+// Spread each day's sessions across the whole 09:00-19:30 workday instead of
+// stacking them all in the morning, but in "waves" of ~2 sessions rather than
+// evenly solo-spaced: each wave lands in a different part of the day (morning
+// / after-lunch / late-afternoon) so the lanes fan out across the chart, while
+// the two sessions within a wave still start close together for the
+// concurrency peaks the dashboard is supposed to show.
+const DAY_START_MIN = 9 * 60;
+const DAY_END_MIN = 19 * 60 + 30;
+const WAVE_SIZE = 2;
+
 for (let dayIdx = 0; dayIdx < WEEK.length; dayIdx++) {
   const day = addDays(DAY0, dayIdx);
   const branches = WEEK[dayIdx];
 
-  let startMin = 9 * 60; // 09:00
+  const waveCount = Math.ceil(branches.length / WAVE_SIZE);
+  const span = DAY_END_MIN - DAY_START_MIN;
+  const waveSlot = span / waveCount;
   for (let i = 0; i < branches.length; i++) {
-    startMin += i === 0 ? 0 : randInt(15, 55);
-    if (startMin > 18 * 60) startMin = 18 * 60 - randInt(0, 90);
+    const waveIdx = Math.floor(i / WAVE_SIZE);
+    const withinWave = i % WAVE_SIZE;
+    const waveStart = DAY_START_MIN + waveSlot * waveIdx + randInt(-15, 15);
+    const startMin = Math.max(DAY_START_MIN, Math.min(DAY_END_MIN - 30, waveStart + withinWave * randInt(10, 35)));
     buildSession(day, branches[i], startMin);
   }
 }
