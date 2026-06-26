@@ -30,12 +30,12 @@ export default function IndexScreen({ vm }) {
         {/* vibes-audit: 罫線付きサマリ欄。11px/16px 混在の数値・字間・左罫線レイアウトは
            vibes Text(固定4サイズ・字間不可) や DescriptionList の体裁では再現できない。 */}
         <aside style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-2)', letterSpacing: '.04em', lineHeight: 1.9, borderLeft: '1px solid var(--rule)', padding: '6px 0 6px 22px' }}>
-          <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em', marginBottom: 10 }}>TODAY · 6/19 (Fri)</div>
-          <div>本日 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>6h 42m</span></div>
-          <div>AI 比率 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>67%</span></div>
-          <div>並列ピーク <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>4 件</span></div>
-          <div>セッション <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>5 件</span></div>
-          <div>中断 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>6 件</span></div>
+          <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--accent)', letterSpacing: '.06em', marginBottom: 10 }}>TODAY</div>
+          <div>本日 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>{vm.todayStats[0].value}{vm.todayStats[0].unit}</span></div>
+          <div>AI 比率 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>{vm.aiPct}%</span></div>
+          <div>並列ピーク <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>{vm.maxPar} 件</span></div>
+          <div>セッション <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>{vm.todayStats[1].value} 件</span></div>
+          <div>中断 <span style={{ fontFamily: 'var(--font-family-body)', fontSize: 16, color: 'var(--ink)' }}>{vm.todayStats[3].value} 件</span></div>
         </aside>
       </div>
 
@@ -59,7 +59,7 @@ export default function IndexScreen({ vm }) {
       </div>
 
       <div style={{ marginTop: 64, paddingTop: 24, borderTop: '1px solid var(--rule)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-2)', letterSpacing: '.04em' }}>並列 avg 2.3 / peak 4 · AI 67% · 中断 6</div>
+        <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-2)', letterSpacing: '.04em' }}>並列 avg {vm.weekConcAvg} / peak {vm.weekConcPeak} · AI {vm.weekAvgAi}% · 中断 {vm.weekTotals.interrupts}</div>
       </div>
     </article>
   );

@@ -59,7 +59,7 @@ function emptyFacts(cfg, project) {
     aiSumAi: 0,
     aiSumMn: 0,
     aiActivities: [],
-    mnActivities: [{ label: '(内訳の自動取得なし)', mins: 0 }],
+    mnActivities: [{ label: '(待機時間・内訳取得不可)', mins: 0 }],
     parData: [0],
     highlights: [],
     focalSessions: [],
@@ -341,7 +341,7 @@ export function aggregate({ project } = {}) {
     .map(([label, mins]) => ({ label, mins }))
     .sort((a, b) => b.mins - a.mins)
     .slice(0, 5);
-  const mnActivities = [{ label: '(内訳の自動取得なし)', mins: aiSumMn }];
+  const mnActivities = [{ label: '(待機時間・内訳取得不可)', mins: aiSumMn }];
 
   // ---- parData: today's concurrency across active window ----
   let parData = [];
@@ -364,7 +364,7 @@ export function aggregate({ project } = {}) {
       label: '作業時間',
       value: `${Math.floor(todayDaily.mins / 60)}:${pad2(todayDaily.mins % 60)}`,
       unit: 'h',
-      sub: `うち AI ${Math.floor(aiSumAi / 60)}:${pad2(aiSumAi % 60)} / 手動 ${Math.floor(aiSumMn / 60)}:${pad2(aiSumMn % 60)}`,
+      sub: `うち 実行 ${Math.floor(aiSumAi / 60)}:${pad2(aiSumAi % 60)} / 待機 ${Math.floor(aiSumMn / 60)}:${pad2(aiSumMn % 60)}`,
     },
     { label: 'セッション', value: String(todayDaily.sessions), unit: '件', sub: `subagent ${todayDaily.subagents}` },
     { label: '並列ピーク', value: String(todayDaily.peak), unit: '隻', sub: `中央 ${Math.round(parData.reduce((a, b) => a + b, 0) / parData.length)}` },

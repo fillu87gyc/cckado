@@ -1,0 +1,22 @@
+{
+  "userID": "demo-user-0001",
+  "numStartups": 128,
+  "projects": {
+    "/home/dev/acme-web": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep", "Task"],
+      "mcpServers": {
+        "github": { "command": "github-mcp" },
+        "playwright": { "command": "playwright-mcp" }
+      },
+      "history": [{ "display": "サブエージェントのフロー設計を試す" }]
+    },
+    "/home/dev/billing-api": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep"],
+      "history": [{ "display": "課金プランのカラム追加マイグレーション" }]
+    },
+    "/home/user/cckado": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm *)", "Grep"],
+      "history": [{ "display": "モックデータのjsonを何とか増やして再現して欲しい" }]
+    }
+  }
+}
