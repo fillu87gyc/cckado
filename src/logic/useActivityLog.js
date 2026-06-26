@@ -162,13 +162,6 @@ function renderVals(s, actions, data) {
     };
   });
 
-  const tocItems = [
-    { num: '01', jp: '本日', en: "Today's Edition", page: 'p.4', lede: '六月十九日、金曜日。AI 比率 67%、並列ピーク 4 件。本日の特異点と所感。', go: go('today') },
-    { num: '02', jp: '稼働ログ', en: 'The Logbook', page: 'p.8', lede: 'セッション 5 件の詳細。メインスレッドと subagent の活動を時間帯で並べる。', go: go('log') },
-    { num: '03', jp: '作業分布', en: 'Style Map', page: 'p.14', lede: 'AI 委任度 × 並列セッション数の二軸マトリックス。9 型のうちの現在地。', go: go('compass') },
-    { num: '04', jp: '四半期推移', en: 'Quarterly Report', page: 'p.20', lede: 'Q2 (4月～6月) の推移。スクラブ・ヒートマップ・型遷移・ツール構成。', go: go('quarter') },
-  ];
-
   const todayStats = data.todayStats;
 
   // -- § 1 AI vs Manual: horizontal split bar + activity breakdown --
@@ -218,6 +211,14 @@ function renderVals(s, actions, data) {
   // -- § 2 Parallel: discrete step bars with Y guidelines --
   const parData = data.parData && data.parData.length ? data.parData : [0];
   const maxPar = Math.max(1, ...parData);
+
+  const tocItems = [
+    { num: '01', jp: '本日', en: "Today's Edition", page: 'p.4', lede: `六月十九日、金曜日。AI 比率 ${aiPct}%、並列ピーク ${maxPar} 件。本日の特異点と所感。`, go: go('today') },
+    { num: '02', jp: '稼働ログ', en: 'The Logbook', page: 'p.8', lede: 'セッション 5 件の詳細。メインスレッドと subagent の活動を時間帯で並べる。', go: go('log') },
+    { num: '03', jp: '作業分布', en: 'Style Map', page: 'p.14', lede: 'AI 委任度 × 並列セッション数の二軸マトリックス。9 型のうちの現在地。', go: go('compass') },
+    { num: '04', jp: '四半期推移', en: 'Quarterly Report', page: 'p.20', lede: 'Q2 (4月～6月) の推移。スクラブ・ヒートマップ・型遷移・ツール構成。', go: go('quarter') },
+  ];
+
   const parChartW = 400,
     parChartH = 140;
   const parPadL = 28,

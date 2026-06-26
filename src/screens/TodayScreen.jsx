@@ -134,7 +134,7 @@ export default function TodayScreen({ vm }) {
               ))}
               <g>
                 <circle cx={vm.parPeakBar.topX1} cy={vm.parPeakBar.topY} r="3" fill="var(--accent)" stroke="var(--bg)" strokeWidth="1.2" />
-                <text x={vm.parPeakBar.topX1} y={vm.parPeakBar.topY} dx="6" dy="-4" fontSize="9" fill="var(--accent)" letterSpacing=".06em">peak 4</text>
+                <text x={vm.parPeakBar.topX1} y={vm.parPeakBar.topY} dx="6" dy="-4" fontSize="9" fill="var(--accent)" letterSpacing=".06em">peak {vm.maxPar}</text>
               </g>
               {vm.parXAxis.map((x, i) => (
                 <text key={i} x={x.x} y={vm.parChartH} dy="-4" textAnchor="middle" fontSize="9" fill="var(--ink-3)" letterSpacing=".04em">{x.t}</text>
