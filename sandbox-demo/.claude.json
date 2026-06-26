@@ -9,6 +9,10 @@
         "playwright": { "command": "playwright-mcp" }
       },
       "history": [{ "display": "サブエージェントのフロー設計を試す" }]
+    },
+    "/home/dev/billing-api": {
+      "allowedTools": ["Read", "Edit", "Write", "Bash(npm run *)", "Grep"],
+      "history": [{ "display": "課金プランのカラム追加マイグレーション" }]
     }
   }
 }
