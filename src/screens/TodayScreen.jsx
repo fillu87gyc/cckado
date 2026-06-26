@@ -27,14 +27,14 @@ export default function TodayScreen({ vm }) {
         ))}
       </div>
 
-      {/* § 1 — AI vs Manual */}
+      {/* § 1 — Tool-active time vs idle/non-tool time */}
       <div style={{ marginBottom: 48 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
           {/* 小見出しを vibes SubSectionTitle (<h3>) へ移行。 */}
-          <SubSectionTitle>AI と人手の時間配分</SubSectionTitle>
+          <SubSectionTitle>ツール実行時間と待機時間の配分</SubSectionTitle>
           <div style={{ display: 'flex', gap: 20, fontFamily: 'var(--font-family-body)', fontSize: 12, color: 'var(--ink-3)' }}>
-            <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--accent)', verticalAlign: 'middle', marginRight: 6 }}></span>AI {vm.aiPct}% · {vm.aiHours}h {vm.aiMins}m</span>
-            <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--sea)', verticalAlign: 'middle', marginRight: 6 }}></span>手動 {vm.mnPct}% · {vm.mnHours}h {vm.mnMins}m</span>
+            <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--accent)', verticalAlign: 'middle', marginRight: 6 }}></span>ツール実行 {vm.aiPct}% · {vm.aiHours}h {vm.aiMins}m</span>
+            <span><span style={{ display: 'inline-block', width: 12, height: 8, background: 'var(--sea)', verticalAlign: 'middle', marginRight: 6 }}></span>待機 {vm.mnPct}% · {vm.mnHours}h {vm.mnMins}m</span>
             <span style={{ fontFamily: 'var(--font-family-body)', color: 'var(--ink-2)' }}>total 6h 42m · 402 min</span>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function TodayScreen({ vm }) {
           <div style={{ borderRight: '1px solid var(--color-border)', padding: '16px 18px 4px 0' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
               <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--accent)' }}></span>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 13, letterSpacing: '.08em' }}>AI が進めたこと</div>
+              <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 13, letterSpacing: '.08em' }}>ツールが実行中だった時間</div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>{vm.aiHours}h {vm.aiMins}m / {vm.aiPct}%</div>
             </div>
             {vm.aiActsRich.map((a, i) => (
@@ -90,7 +90,7 @@ export default function TodayScreen({ vm }) {
           <div style={{ padding: '16px 0 4px 18px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
               <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--sea)' }}></span>
-              <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 13, letterSpacing: '.08em' }}>人が握ったこと</div>
+              <div style={{ fontFamily: 'var(--font-family-body)', fontWeight: 600, fontSize: 13, letterSpacing: '.08em' }}>ツール非実行（待機・応答生成など）</div>
               <div style={{ fontFamily: 'var(--font-family-body)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: '.06em' }}>{vm.mnHours}h {vm.mnMins}m / {vm.mnPct}%</div>
             </div>
             {vm.mnActsRich.map((a, i) => (
